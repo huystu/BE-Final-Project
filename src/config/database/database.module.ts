@@ -16,7 +16,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         entities: [__dirname + '../../entities/*{.ts,.js}'],
         synchronize: true,
         autoLoadEntities: true,
-        logging: true,
         ssl: configService.get('APP_ENV') === 'prod',
         extra:
           configService.get('APP_ENV') === 'prod'

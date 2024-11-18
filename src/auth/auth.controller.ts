@@ -1,9 +1,14 @@
-import { Controller, Post, Body, UnauthorizedException, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UnauthorizedException,
+  Get,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
+import { FotgetPasswordDTO } from './dto/forgetPassword.dto';
 import { LoginDto } from './dto/login.dto';
-
-
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('/api/auth')
 export class AuthController {
@@ -11,9 +16,7 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(
-      registerDto,
-    );
+    return this.authService.register(registerDto);
   }
 
   @Get('users')
@@ -29,5 +32,10 @@ export class AuthController {
       throw new UnauthorizedException('Invalid credentials');
     }
     return this.authService.login(user);
+  }
+
+  @Post('fotgetPassword')
+  fotgetPassword(@Body() fotgetPasswordDTO: FotgetPasswordDTO) {
+    return this.authService.fotgetPassword(fotgetPasswordDTO);
   }
 }
