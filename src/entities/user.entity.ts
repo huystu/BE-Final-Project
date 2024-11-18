@@ -8,8 +8,8 @@ import {
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ type: 'varchar', length: 50, unique: true })
   username: string;
@@ -23,6 +23,6 @@ export class User {
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamp', nullable: true })
   updatedAt: Date;
 }

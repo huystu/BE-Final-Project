@@ -4,7 +4,9 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/entities/user.entity';
+import { MailService } from 'src/provider/mail/mail.service';
 import { Repository } from 'typeorm';
+import { FotgetPasswordDTO } from './dto/forgetPassword.dto';
 import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
@@ -14,6 +16,7 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly mailService: MailService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<User> {
@@ -56,5 +59,41 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async fotgetPassword(fotgetPasswordDTO: FotgetPasswordDTO) {
+    const { email } = fotgetPasswordDTO;
+
+    const currentUser = await this.userRepository.findOne({
+      where: { email },
+    });
+    if (!currentUser) {
+      throw new BadRequestException('User not found');
+    }
+
+    const newPassword = this.generateRandomPassword(8);
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    currentUser.password = hashedPassword;
+    await this.userRepository.save(currentUser);
+
+    await this.mailService.sendMail(
+      email,
+      `Your new password is: ${newPassword}`,
+    );
+
+    return {
+      message: 'New Password has been sent to your email and updated securely',
+    };
+  }
+
+  private generateRandomPassword(length: number): string {
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let password = '';
+    for (let i = 0; i < length; i++) {
+      password += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return password;
   }
 }
