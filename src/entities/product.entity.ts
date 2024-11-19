@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -42,10 +43,11 @@ export class Product {
 
   @ManyToOne(() => Category, (category) => category.products)
   category: Category;
-
+  
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
 }

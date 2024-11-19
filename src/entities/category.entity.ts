@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -10,7 +11,7 @@ import { Product } from './product.entity';
 
 @Entity('category')
 export class Category {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid') // Use 'uuid' for consistency with Product entity
   id: string;
 
   @Column({ type: 'varchar', unique: true })
