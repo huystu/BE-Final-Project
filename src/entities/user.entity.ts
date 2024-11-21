@@ -28,7 +28,6 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamp', nullable: true })
   updatedAt: Date;
-  
 
   @OneToOne(() => Cart, (cart) => cart.user)
   cart: Cart;
