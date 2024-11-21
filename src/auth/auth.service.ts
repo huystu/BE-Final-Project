@@ -7,7 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from 'src/entities/user.entity';
 import { MailService } from 'src/provider/mail/mail.service';
 import { Repository } from 'typeorm';
-import { FotgetPasswordDTO } from './dto/forgetPassword.dto';
+import { ForgotPasswordDTO } from './dto/forgotPassword.dto';
 import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
@@ -62,8 +62,8 @@ export class AuthService {
     };
   }
 
-  async fotgetPassword(fotgetPasswordDTO: FotgetPasswordDTO) {
-    const { email } = fotgetPasswordDTO;
+  async forgotPassword(forgotPasswordDTO: ForgotPasswordDTO) {
+    const { email } = forgotPasswordDTO;
 
     const currentUser = await this.userRepository.findOne({
       where: { email },

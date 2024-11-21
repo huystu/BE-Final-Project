@@ -11,6 +11,7 @@ import { ProductModule } from './app/product/product.module';
 import { CategoryModule } from './app/category/category.module';
 import { MailModule } from './provider/mail/mail.module';
 import { CartModule } from './app/cart/cart.module';
+import { VnpayModule } from './app/payment/vnpay.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { CartModule } from './app/cart/cart.module';
     CategoryModule,
     MailModule,
     CartModule,
+    VnpayModule,
   ],
   controllers: [AppController],
   providers: [AppService],
