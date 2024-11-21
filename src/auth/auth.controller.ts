@@ -6,11 +6,11 @@ import {
   Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { FotgetPasswordDTO } from './dto/forgetPassword.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ForgotPasswordDTO } from './dto/forgotPassword.dto';
 
-@Controller('/api/auth')
+@Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -34,8 +34,8 @@ export class AuthController {
     return this.authService.login(user);
   }
 
-  @Post('fotgetPassword')
-  fotgetPassword(@Body() fotgetPasswordDTO: FotgetPasswordDTO) {
-    return this.authService.fotgetPassword(fotgetPasswordDTO);
+  @Post('forgotPassword')
+  forgotPassword(@Body() forgotPasswordDTO: ForgotPasswordDTO) {
+    return this.authService.forgotPassword(forgotPasswordDTO);
   }
 }

@@ -5,7 +5,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
+import { Cart } from './cart.entity';
 
 @Entity('users')
 export class User {
@@ -26,4 +28,8 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamp', nullable: true })
   updatedAt: Date;
+  
+
+  @OneToOne(() => Cart, (cart) => cart.user)
+  cart: Cart;
 }

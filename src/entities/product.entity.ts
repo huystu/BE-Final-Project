@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Category } from './category.entity';
 import { ProductPhoto } from './productPhoto.entity';
+import { CartTransaction } from './cartTransaction.entity';
 
 export interface ProductInfo {
   description: string;
@@ -43,11 +44,11 @@ export class Product {
 
   @ManyToOne(() => Category, (category) => category.products)
   category: Category;
-  
+  @OneToMany(() => CartTransaction, (transaction) => transaction.cart) // Thêm quan hệ
+  transactions: CartTransaction[];
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
 }

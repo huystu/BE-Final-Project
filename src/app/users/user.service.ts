@@ -20,4 +20,11 @@ export class UserService {
   async getUsers(): Promise<User[]> {
     return this.UsersRepository.find();
   }
+  async getUsersById(id: string): Promise<User> {
+    return await this.UsersRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+  }
 }
