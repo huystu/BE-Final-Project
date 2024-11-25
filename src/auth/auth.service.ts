@@ -89,12 +89,25 @@ export class AuthService {
   }
 
   private generateRandomPassword(length: number): string {
-    const chars =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const allChars = uppercase + lowercase + numbers;
+
     let password = '';
-    for (let i = 0; i < length; i++) {
-      password += chars[Math.floor(Math.random() * chars.length)];
+    password += uppercase[Math.floor(Math.random() * uppercase.length)]; 
+    password += lowercase[Math.floor(Math.random() * lowercase.length)]; 
+    password += numbers[Math.floor(Math.random() * numbers.length)]; 
+
+    for (let i = 3; i < length; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
     }
+
+    password = password
+      .split('') 
+      .sort(() => Math.random() - 0.5) 
+      .join(''); 
+
     return password;
   }
 }
