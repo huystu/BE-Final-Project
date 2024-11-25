@@ -22,6 +22,25 @@ export class User {
 
   @Column({ type: 'varchar', length: 255 })
   password: string;
+  @Column({ type: 'varchar', nullable: true })
+  fullName: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  address: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  phoneNumber: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  url: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  description: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  avatar: string;
+
+
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

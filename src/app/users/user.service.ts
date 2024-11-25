@@ -1,9 +1,11 @@
+/* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from './dto/changePassword.dto';
+import { UpdateProfileDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -60,4 +62,38 @@ export class UserService {
 
     return { message: 'Password changed successfully' };
   }
+  async getProfileById(userId: string) {
+    const user = await this.UsersRepository.findOne({
+      where: { id: userId },
+      select: [
+        'id', 
+        'username', 
+        'email', 
+        'fullName', 
+        'address', 
+        'phoneNumber', 
+        'url', 
+        'description', 
+        'avatar'
+      ]
+    });
+  
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+  
+    return user;
+  }
+
+  async updateProfile(userId: string, updateData: UpdateProfileDto) {
+    const user = await this.UsersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    Object.assign(user, updateData);
+
+    return this.UsersRepository.save(user);
+  }
+
 }
