@@ -8,6 +8,7 @@ import {
   OneToOne,
 } from 'typeorm';
 import { Cart } from './cart.entity';
+import { RefreshToken } from './refreshtoken.entity';
 
 @Entity('users')
 export class User {
@@ -51,4 +52,5 @@ export class User {
 
   @OneToOne(() => Cart, (cart) => cart.user)
   cart: Cart;
+    refreshTokens: RefreshToken[];
 }
