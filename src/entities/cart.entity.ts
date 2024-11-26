@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { CartTransaction } from './cartTransaction.entity';
+import { OrderDetails } from './orderDetails.entity';
 
 @Entity('cart')
 export class Cart {
@@ -33,4 +34,9 @@ export class Cart {
 
   @OneToMany(() => CartTransaction, (transaction) => transaction.cart)
   transactions: CartTransaction[];
+
+  @OneToMany(() => OrderDetails, (orderDetails) => orderDetails.cart, {
+    cascade: true,
+  })
+  orderDetails: OrderDetails[];
 }
