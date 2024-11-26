@@ -20,20 +20,6 @@ export class ProductService {
     private categoryRepository: Repository<Category>,
   ) {}
 
-  // async create(createProductDto: CreateProductDto) {
-  //   const category = await this.categoryRepository.findOne({
-  //     where: { id: createProductDto.categoryId },
-  //   });
-  //   if (!category) {
-  //     throw new NotFoundException('Category not found');
-  //   }
-
-  //   const product = this.productRepository.create({
-  //     ...createProductDto,
-  //     category,
-  //   });
-  //   return this.productRepository.save(product);
-  // }
   async create(createProductDto: CreateProductDto): Promise<Product> {
     try {
       const category = await this.categoryRepository.findOne({
@@ -122,5 +108,32 @@ export class ProductService {
         photos: true,
       },
     });
+  }
+
+
+  async findByCategory(categoryId: string, pageOptionsDto: PageOptionsDto): Promise<PageDto<Product>> {
+    const { name, page, take, orderBy } = pageOptionsDto;
+    const takeData = take || 10;
+    const skip: number = (page - 1) * take;
+  
+    const [result, total] = await this.productRepository.findAndCount({
+      where: {
+        category: { id: categoryId },
+        name: name ? ILike(`%${name.toLowerCase()}%`) : Like(`%%`),
+        isDelete: false,
+      },
+      relations: {
+        photos: true,
+        category: true,
+      },
+      order: {
+        createdAt: orderBy,
+      },
+      skip: skip,
+      take: takeData,
+    });
+  
+    const pageMetaDto = new PageMetaDto(pageOptionsDto, total);
+    return new PageDto<Product>(result, pageMetaDto, 'Success');
   }
 }

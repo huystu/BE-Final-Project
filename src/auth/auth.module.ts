@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -29,3 +30,4 @@ import { User } from 'src/entities/user.entity';
   exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}
+
