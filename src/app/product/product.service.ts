@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PageOptionsDto } from 'src/common/pagination/paginationOptions';
-import { PageDto } from 'src/common/pagination/responsePagination';
+import { PageOptionsDto } from 'src/common/pagination/paginationOptions.dto';
+import { PageDto } from 'src/common/pagination/responsePagination.dto';
 import { Product } from 'src/entities/product.entity';
 //import { User } from 'src/entities/user.entity';
 import { ILike, Like, Repository } from 'typeorm';
@@ -28,7 +28,7 @@ export class ProductService {
       if (!category) {
         throw new NotFoundException('Category not found');
       }
-  
+
       const product = this.productRepository.create({
         ...createProductDto,
         category,
@@ -39,7 +39,6 @@ export class ProductService {
       throw new Error('Internal server error');
     }
   }
-  
 
   async findOne(id: string) {
     const product = await this.productRepository.findOne({
@@ -68,7 +67,7 @@ export class ProductService {
     return this.productRepository.save(product);
   }
 
-  async remove (id: string) {
+  async remove(id: string) {
     const product = await this.findOne(id);
     product.isDelete = true;
     return this.productRepository.save(product);
@@ -96,8 +95,6 @@ export class ProductService {
     const pageMetaDto = new PageMetaDto(pageOptionsDto, total);
     return new PageDto<Product>(result, pageMetaDto, 'Success');
   }
-
-  
 
   async findById(id: string): Promise<Product | null> {
     return await this.productRepository.findOne({

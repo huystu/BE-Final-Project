@@ -8,6 +8,7 @@ import {
   OneToOne,
 } from 'typeorm';
 import { Cart } from './cart.entity';
+import { RefreshToken } from './refreshtoken.entity';
 
 @Entity('users')
 export class User {
@@ -47,8 +48,8 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamp', nullable: true })
   updatedAt: Date;
-  
 
   @OneToOne(() => Cart, (cart) => cart.user)
   cart: Cart;
+    refreshTokens: RefreshToken[];
 }

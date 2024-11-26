@@ -8,6 +8,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
+import { RefreshToken } from 'src/entities/refreshtoken.entity'; // Import thực thể RefreshToken
 
 @Module({
   imports: [
@@ -17,13 +18,13 @@ import { User } from 'src/entities/user.entity';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: configService.get<string | number>('EXPIRES_IN'),
+          expiresIn: '15m',
         },
       }),
       inject: [ConfigService],
     }),
     ConfigModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, RefreshToken]), // Thêm RefreshToken vào TypeOrmModule
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
