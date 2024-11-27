@@ -32,12 +32,11 @@ export class CartService {
       },
       relations: {
         transactions: {
-          product: true
-        } ,
+          product: true,
+        },
       },
     });
     if (!currentCart) {
-      
       throw new NotFoundException(`Cart with ID ${id} not found`);
     }
     return currentCart;
@@ -90,7 +89,7 @@ export class CartService {
       await this.cartRepository.save(newCart);
       await this.cartTransactionRepository.save(listOrderDetails);
       await this.caculateTotalPrice(cartId);
-      
+
       return await this.cartRepository.findOne({
         where: { cartId: newCart.cartId },
         relations: {
@@ -127,7 +126,7 @@ export class CartService {
             quantity: 1,
             price: item.price,
           });
-          
+
           if (discount) {
             currentCart.discount = discount;
             await this.cartRepository.save(currentCart);
@@ -138,6 +137,71 @@ export class CartService {
       }
     }
     await this.caculateTotalPrice(cartId);
+  }
+
+  async minusQuantityOrderDetails(id: string): Promise<boolean> {
+    const orderDetails = await this.cartTransactionRepository.findOne({
+      where: {
+        transactionId: id,
+      },
+      relations: ['product', 'cart'],
+    });
+    if (!orderDetails) {
+      throw new NotFoundException('Order details not found');
+    }
+
+    const currentProduct = await this.productRepository.findOne({
+      where: {
+        id: orderDetails.product.id,
+      },
+    });
+
+    if (orderDetails.quantity <= 0) {
+      throw new BadRequestException('Cannot reduce quantity below zero');
+    }
+
+    orderDetails.quantity -= 1;
+    currentProduct.quantity += 1;
+    orderDetails.price = orderDetails.quantity * currentProduct.price;
+    await this.cartTransactionRepository.save(orderDetails);
+    await this.productRepository.save(currentProduct);
+
+    await this.caculateTotalPrice(orderDetails.cart.cartId);
+
+    return true;
+  }
+
+  async plusQuantityOrderDetails(id: string): Promise<boolean> {
+    const orderDetails = await this.cartTransactionRepository.findOne({
+      where: {
+        transactionId: id,
+      },
+      relations: ['product', 'cart'],
+    });
+    if (!orderDetails) {
+      throw new NotFoundException('Order details not found');
+    }
+
+    const currentProduct = await this.productRepository.findOne({
+      where: {
+        id: orderDetails.product.id,
+      },
+    });
+
+    if (currentProduct.quantity <= 0) {
+      throw new BadRequestException('Product is out of stock');
+    }
+
+    orderDetails.quantity += 1;
+    currentProduct.quantity -= 1;
+    orderDetails.price = orderDetails.quantity * currentProduct.price
+
+    await this.cartTransactionRepository.save(orderDetails);
+    await this.productRepository.save(currentProduct);
+
+    await this.caculateTotalPrice(orderDetails.cart.cartId);
+
+    return true;
   }
 
   async caculateTotalPrice(id: string): Promise<unknown> {

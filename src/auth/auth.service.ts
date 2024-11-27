@@ -1,5 +1,9 @@
 /* eslint-disable prettier/prettier */
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,12 +14,18 @@ import { MailService } from 'src/provider/mail/mail.service';
 import { Repository } from 'typeorm';
 import { ForgotPasswordDTO } from './dto/forgotPassword.dto';
 import { RegisterDto } from './dto/register.dto';
+import { UserRole } from 'src/entities/userRole.entity';
+import { Role } from 'src/entities/role.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(UserRole)
+    private readonly userRoleRepository: Repository<UserRole>,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
     private readonly jwtService: JwtService,
@@ -24,7 +34,7 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto): Promise<User> {
-    const { email, username, password, phoneNumber  } = registerDto;
+    const { email, username, password, phoneNumber } = registerDto;
     const existingUser = await this.userRepository.findOne({
       where: [{ email }, { username }],
     });
@@ -44,7 +54,18 @@ export class AuthService {
       username,
       phoneNumber,
     });
-    return this.userRepository.save(newUser);
+    const userRole = await this.roleRepository.findOne({
+      where: {
+        name: 'user',
+      },
+    });
+    const user = await this.userRepository.save(newUser);
+    const relationUser = this.userRoleRepository.create({
+      role: userRole,
+      user: user,
+    });
+    await this.userRoleRepository.save(relationUser);
+    return user;
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -63,7 +84,7 @@ export class AuthService {
 
   async login(user: any) {
     const payload = { id: user.id, email: user.email };
-    
+
     // Tạo access token
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_SECRET'),
@@ -171,18 +192,18 @@ export class AuthService {
     const allChars = uppercase + lowercase + numbers;
 
     let password = '';
-    password += uppercase[Math.floor(Math.random() * uppercase.length)]; 
-    password += lowercase[Math.floor(Math.random() * lowercase.length)]; 
-    password += numbers[Math.floor(Math.random() * numbers.length)]; 
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
 
     for (let i = 3; i < length; i++) {
       password += allChars[Math.floor(Math.random() * allChars.length)];
     }
 
     password = password
-      .split('') 
-      .sort(() => Math.random() - 0.5) 
-      .join(''); 
+      .split('')
+      .sort(() => Math.random() - 0.5)
+      .join('');
 
     return password;
   }
