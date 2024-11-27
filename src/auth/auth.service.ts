@@ -34,7 +34,7 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto): Promise<User> {
-    const { email, username, password, phoneNumber } = registerDto;
+    const { email, username, password, phone } = registerDto;
     const existingUser = await this.userRepository.findOne({
       where: [{ email }, { username }],
     });
@@ -52,7 +52,7 @@ export class AuthService {
       email,
       password: hashedPassword,
       username,
-      phoneNumber,
+      phone,
     });
     const userRole = await this.roleRepository.findOne({
       where: {

@@ -6,8 +6,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
-  ManyToMany,
-  JoinTable,
   OneToMany,
 } from 'typeorm';
 import { Cart } from './cart.entity';
@@ -34,8 +32,8 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   address: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  phoneNumber: number;
+  @Column({ type: 'varchar'})
+  phone: number;
 
   @Column({ type: 'varchar', nullable: true })
   url: string;
