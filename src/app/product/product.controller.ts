@@ -50,4 +50,9 @@ export class ProductController {
   async getById(@Param('id') id: string) {
     return this.productService.findById(id);
   }
+
+  @Get('category/:id')
+  async getByCategory(@Param('id') categoryId: string, @Query() pageOptionsDto: PageOptionsDto) {
+  return this.productService.findByCategory(categoryId, pageOptionsDto);
+}
 }

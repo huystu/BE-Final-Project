@@ -31,11 +31,14 @@ export class CartService {
         cartId: id,
       },
       relations: {
-        transactions: true,
+        transactions: {
+          product: true
+        } ,
       },
     });
-    if (currentCart) {
-      throw new NotFoundException(`don't have ID`);
+    if (!currentCart) {
+      
+      throw new NotFoundException(`Cart with ID ${id} not found`);
     }
     return currentCart;
   }
