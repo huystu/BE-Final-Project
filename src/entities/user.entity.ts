@@ -6,9 +6,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { Cart } from './cart.entity';
 import { RefreshToken } from './refreshtoken.entity';
+// import { Role } from './role.entity';
 
 @Entity('users')
 export class User {
@@ -30,7 +33,7 @@ export class User {
   address: string;
 
   @Column({ type: 'varchar', nullable: true })
-  phoneNumber: string;
+  phoneNumber: number;
 
   @Column({ type: 'varchar', nullable: true })
   url: string;
@@ -41,7 +44,9 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   avatar: string;
 
-
+  // @ManyToMany(() => Role, (role) => role.users, { cascade: true })
+  // @JoinTable()
+  // roles: Role[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
@@ -51,5 +56,5 @@ export class User {
 
   @OneToOne(() => Cart, (cart) => cart.user)
   cart: Cart;
-    refreshTokens: RefreshToken[];
+  refreshTokens: RefreshToken[];
 }

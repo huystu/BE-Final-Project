@@ -50,6 +50,11 @@ export class CreateProductDto {
   price: number;
 
   @ApiProperty({})
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+
+  @ApiProperty({})
   @IsObject()
   @ValidateNested()
   @Type(() => ProductInfoDto)
