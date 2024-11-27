@@ -1,10 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/entities/user.entity';
+import { RefreshToken } from 'src/entities/refreshtoken.entity';
 import { MailService } from 'src/provider/mail/mail.service';
 import { Repository } from 'typeorm';
 import { ForgotPasswordDTO } from './dto/forgotPassword.dto';
@@ -15,6 +16,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(RefreshToken)
+    private readonly refreshTokenRepository: Repository<RefreshToken>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
@@ -50,15 +53,84 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (user && (await bcrypt.compare(password, user.password))) {
-      return { email: user.email };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...result } = user;
+      return result;
     }
     return null;
   }
 
   async login(user: any) {
     const payload = { id: user.id, email: user.email };
+    
+    // Tạo access token
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_SECRET'),
+      expiresIn: '15m',
+    });
+
+    // Tạo refresh token
+    const refreshToken = await this.createRefreshToken(user);
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
+      refresh_token: refreshToken.token,
+    };
+  }
+
+  async createRefreshToken(user: User): Promise<RefreshToken> {
+    // Xóa refresh token cũ nếu có
+    await this.refreshTokenRepository.delete({ userId: user.id });
+
+    const expiration = new Date();
+    expiration.setDate(expiration.getDate() + 7); // Token hết hạn sau 7 ngày
+
+    const refreshToken = this.refreshTokenRepository.create({
+      user: user,
+      userId: user.id,
+      token: this.jwtService.sign(
+        { userId: user.id },
+        {
+          secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+          expiresIn: '7d',
+        },
+      ),
+      expiresAt: expiration,
+    });
+
+    return await this.refreshTokenRepository.save(refreshToken);
+  }
+
+  async refreshAccessToken(refreshToken: string) {
+    const token = await this.refreshTokenRepository.findOne({
+      where: { token: refreshToken },
+      relations: ['user'],
+    });
+
+    if (!token) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    if (new Date() > token.expiresAt) {
+      await this.refreshTokenRepository.delete({ token: refreshToken });
+      throw new UnauthorizedException('Refresh token expired');
+    }
+
+    const payload = { id: token.user.id, email: token.user.email };
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_SECRET'),
+      expiresIn: '15m',
+    });
+
+    return {
+      access_token: accessToken,
+    };
+  }
+
+  async logout(userId: string) {
+    await this.refreshTokenRepository.delete({ userId });
+    return {
+      message: 'Logged out successfully',
     };
   }
 
@@ -77,6 +149,9 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     currentUser.password = hashedPassword;
     await this.userRepository.save(currentUser);
+
+    // Xóa refresh token khi reset password
+    await this.refreshTokenRepository.delete({ userId: currentUser.id });
 
     await this.mailService.sendMail(
       email,
