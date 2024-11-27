@@ -14,10 +14,11 @@ export class UserService {
     private UsersRepository: Repository<User>,
   ) {}
 
-  async register(email: string, password: string): Promise<User> {
+  async register(email: string, password: string, phoneNumber: number ): Promise<User> {
     const user = new User();
     user.email = email;
     user.password = password;
+    user.phoneNumber = phoneNumber;
     return this.UsersRepository.save(user);
   }
 
