@@ -8,6 +8,9 @@ import {
   Param,
   Body,
   Query,
+  Patch,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { AddProductToCartDto } from './dto/addProductToCart.dto';
@@ -29,6 +32,7 @@ export class CartController {
     description:
       'Optional cart ID. If not provided, a new cart will be created.',
   })
+    
   @Post('')
   async addProductToCart(
     @Query('cartId') cartId: string,
@@ -37,7 +41,17 @@ export class CartController {
     return this.cartService.addProductToCart(cartId, addProductDto);
   }
 
- 
+  @Patch(':id/minus-quantity')
+  @HttpCode(HttpStatus.OK)
+  async minusQuantity(@Param('id') id: string): Promise<boolean> {
+    return await this.cartService.minusQuantityOrderDetails(id);
+  }
+
+  @Patch(':id/plus-quantity')
+  @HttpCode(HttpStatus.OK)
+  async plusQuantity(@Param('id') id: string): Promise<boolean> {
+    return await this.cartService.plusQuantityOrderDetails(id);
+  }
 
   @Delete('/product/:productId')
   async deleteProductFromCart(
@@ -45,6 +59,4 @@ export class CartController {
   ): Promise<CartTransaction> {
     return await this.cartService.deleteProduct(productId);
   }
-
-  
 }

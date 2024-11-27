@@ -9,6 +9,8 @@ import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { RefreshToken } from 'src/entities/refreshtoken.entity'; // Import thực thể RefreshToken
+import { Role } from 'src/entities/role.entity';
+import { UserRole } from 'src/entities/userRole.entity';
 
 @Module({
   imports: [
@@ -24,7 +26,7 @@ import { RefreshToken } from 'src/entities/refreshtoken.entity'; // Import thự
       inject: [ConfigService],
     }),
     ConfigModule,
-    TypeOrmModule.forFeature([User, RefreshToken]), // Thêm RefreshToken vào TypeOrmModule
+    TypeOrmModule.forFeature([User, RefreshToken, Role, UserRole]), // Thêm RefreshToken vào TypeOrmModule
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],

@@ -1,17 +1,15 @@
-// import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
-// import { User } from './user.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { UserRole } from './userRole.entity';
 
-// @Entity('roles')
-// export class Role {
-//   @PrimaryGeneratedColumn('uuid')
-//   id: string;
 
-//   @Column({ unique: true })
-//   name: string;
+@Entity('roles') // Tên bảng nếu bạn muốn map cụ thể
+export class Role {
+  @PrimaryGeneratedColumn('uuid') // Tự động sinh ID kiểu UUID
+  id: string;
 
-//   @Column({ nullable: true })
-//   description: string;
+  @Column({ unique: true })
+  name: string;
 
-//   @ManyToMany(() => User, (user) => user.roles)
-//   users: User[];
-// }
+  @OneToMany(() => UserRole, (userRole) => userRole.role)
+  userRoles: UserRole[];
+}
