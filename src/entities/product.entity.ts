@@ -33,6 +33,9 @@ export class Product {
   @Column({ type: 'boolean', default: false })
   isDelete: boolean;
 
+  @Column({ type: 'varchar', nullable: true })
+  url?: string;
+
   @Column({ type: 'json' })
   info: ProductInfo;
 

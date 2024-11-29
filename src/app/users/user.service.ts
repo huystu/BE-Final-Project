@@ -14,10 +14,11 @@ export class UserService {
     private UsersRepository: Repository<User>,
   ) {}
 
-  async register(email: string, password: string): Promise<User> {
+  async register(email: string, password: string, phone: number ): Promise<User> {
     const user = new User();
     user.email = email;
     user.password = password;
+    user.phone = phone;
     return this.UsersRepository.save(user);
   }
 
@@ -71,7 +72,7 @@ export class UserService {
         'email', 
         'fullName', 
         'address', 
-        'phoneNumber', 
+        'phone', 
         'url', 
         'description', 
         'avatar'

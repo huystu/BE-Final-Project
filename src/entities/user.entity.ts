@@ -6,9 +6,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { Cart } from './cart.entity';
 import { RefreshToken } from './refreshtoken.entity';
+import { UserRole } from './userRole.entity';
+// import { Role } from './role.entity';
 
 @Entity('users')
 export class User {
@@ -29,8 +32,8 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   address: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  phoneNumber: string;
+  @Column({ type: 'varchar'})
+  phone: number;
 
   @Column({ type: 'varchar', nullable: true })
   url: string;
@@ -41,7 +44,8 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   avatar: string;
 
-
+  @OneToMany(() => UserRole, (userRole) => userRole.user)
+  userRoles: UserRole[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
@@ -51,5 +55,5 @@ export class User {
 
   @OneToOne(() => Cart, (cart) => cart.user)
   cart: Cart;
-    refreshTokens: RefreshToken[];
+  refreshTokens: RefreshToken[];
 }
