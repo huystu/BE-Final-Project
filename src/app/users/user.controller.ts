@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
   Put,
   Req,
@@ -22,6 +23,12 @@ export class UserController {
     return this.userService.getUsers();
   }
 
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  async getProfile(@Req() req) {
+    return this.userService.getProfileById(req.user.id);
+  }
+
   @Patch('changePassword')
   @UseGuards(JwtAuthGuard)
   async changePassword(
@@ -32,26 +39,15 @@ export class UserController {
     return this.userService.changePassword(userId, changePasswordDto);
   }
 
-  @Get()
-  getUsers() {
-    return this.userService.getUsers();
-  }
-  @Get('profile')
-  @UseGuards(JwtAuthGuard)
-  async getProfile(@Req() req) {
-    // if (!req.user || !req.user.id) {
-    //   throw new UnauthorizedException('Không tìm thấy người dùng trong token');
-    // }
-    return this.userService.getProfileById(req.user.id);
+  @Get(':id')
+  async getUserById(@Param('id') id: string) {
+    return this.userService.getUsersById(id);
   }
 
   @Put('edit-profile')
   @UseGuards(JwtAuthGuard)
   async editProfile(@Req() req, @Body() updateProfileDto: UpdateProfileDto) {
     console.log('Decoded User:', req.user);
-    // if (!req.user || !req.user.id) {
-    //   throw new UnauthorizedException('User not found in token');
-    // }
     return this.userService.updateProfile(req.user.id, updateProfileDto);
   }
 }

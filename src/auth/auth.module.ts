@@ -11,6 +11,7 @@ import { User } from 'src/entities/user.entity';
 import { RefreshToken } from 'src/entities/refreshtoken.entity'; // Import thực thể RefreshToken
 import { Role } from 'src/entities/role.entity';
 import { UserRole } from 'src/entities/userRole.entity';
+import { UserModule } from 'src/app/users/user.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { UserRole } from 'src/entities/userRole.entity';
       }),
       inject: [ConfigService],
     }),
+    UserModule,
     ConfigModule,
     TypeOrmModule.forFeature([User, RefreshToken, Role, UserRole]), // Thêm RefreshToken vào TypeOrmModule
   ],
