@@ -1,5 +1,9 @@
 /* eslint-disable prettier/prettier */
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -14,7 +18,11 @@ export class UserService {
     private UsersRepository: Repository<User>,
   ) {}
 
-  async register(email: string, password: string, phone: number ): Promise<User> {
+  async register(
+    email: string,
+    password: string,
+    phone: number,
+  ): Promise<User> {
     const user = new User();
     user.email = email;
     user.password = password;
@@ -25,15 +33,18 @@ export class UserService {
   async getUsers(): Promise<User[]> {
     return this.UsersRepository.find();
   }
-  async getUsersById(id: string): Promise<User> {
+  async getUsersById(uuid: string): Promise<User> {
     return await this.UsersRepository.findOne({
       where: {
-        id: id,
+        id: uuid,
       },
     });
   }
 
- async changePassword(id: string, changePasswordDto: ChangePasswordDto): Promise<{ message: string }> {
+  async changePassword(
+    id: string,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
     const { oldPassword, newPassword } = changePasswordDto;
 
     const user = await this.UsersRepository.findOne({ where: { id: id } });
@@ -48,7 +59,9 @@ export class UserService {
     }
 
     if (oldPassword === newPassword) {
-      throw new BadRequestException('New password must be different from old password');
+      throw new BadRequestException(
+        'New password must be different from old password',
+      );
     }
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
@@ -59,26 +72,26 @@ export class UserService {
     return { message: 'Password changed successfully' };
   }
 
-  async getProfileById(userId: string) {
+  async getProfileById(uuid: string) {
     const user = await this.UsersRepository.findOne({
-      where: { id: userId },
+      where: { id: uuid },
       select: [
-        'id', 
-        'username', 
-        'email', 
-        'fullName', 
-        'address', 
-        'phone', 
-        'url', 
-        'description', 
-        'avatar'
-      ]
+        'id',
+        'username',
+        'email',
+        'fullName',
+        'address',
+        'phone',
+        'url',
+        'description',
+        'avatar',
+      ],
     });
-  
+
     if (!user) {
       throw new NotFoundException('Không tìm thấy người dùng');
     }
-  
+
     return user;
   }
 
@@ -92,5 +105,4 @@ export class UserService {
 
     return this.UsersRepository.save(user);
   }
-
 }

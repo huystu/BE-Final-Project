@@ -73,10 +73,24 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (user && (await bcrypt.compare(password, user.password))) {
+    const user = await this.userRepository.findOne({
+      where: { email },
+      relations: ['userRoles', 'userRoles.role'],
+    });
+
+    let userWithRole;
+
+    if (user) {
+      userWithRole = {
+        ...user,
+        role: user.userRoles.map((userRole) => userRole.role),
+      };
+    }
+
+    
+    if (userWithRole && (await bcrypt.compare(password, user.password))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...result } = user;
+      const { password, ...result } = userWithRole;
       return result;
     }
     return null;
@@ -85,7 +99,6 @@ export class AuthService {
   async login(user: any) {
     const payload = { id: user.id, email: user.email };
 
-    // Tạo access token
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_SECRET'),
       expiresIn: '15m',
@@ -97,6 +110,8 @@ export class AuthService {
     return {
       access_token: accessToken,
       refresh_token: refreshToken.token,
+      userId: user.id,
+      roles: user.role.map((item) => item.name)[0] ?? '',
     };
   }
 
