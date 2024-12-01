@@ -23,8 +23,13 @@ export class UserController {
   }
 
   @Patch('changePassword')
-  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
-    return this.userService.changePassword(changePasswordDto);
+  @UseGuards(JwtAuthGuard)
+  async changePassword(
+    @Req() req,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    const userId = req.user.id; // Lấy id người dùng từ token
+    return this.userService.changePassword(userId, changePasswordDto);
   }
 
   @Get()
