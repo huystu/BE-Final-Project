@@ -50,8 +50,8 @@ export class CreateProductDto {
   price: number;
 
   @ApiProperty({})
-  @IsArray()
-  @IsString({ each: true })
+  @IsString()
+  @IsNotEmpty()
   @ArrayMinSize(1)
   urls: string[];
 
