@@ -1,5 +1,9 @@
 /* eslint-disable prettier/prettier */
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -14,7 +18,11 @@ export class UserService {
     private UsersRepository: Repository<User>,
   ) {}
 
-  async register(email: string, password: string, phone: number ): Promise<User> {
+  async register(
+    email: string,
+    password: string,
+    phone: number,
+  ): Promise<User> {
     const user = new User();
     user.email = email;
     user.password = password;
@@ -25,21 +33,21 @@ export class UserService {
   async getUsers(): Promise<User[]> {
     return this.UsersRepository.find();
   }
-  async getUsersById(id: string): Promise<User> {
+  async getUsersById(uuid: string): Promise<User> {
     return await this.UsersRepository.findOne({
       where: {
-        id: id,
+        id: uuid,
       },
     });
   }
 
   async changePassword(
+    id: string,
     changePasswordDto: ChangePasswordDto,
   ): Promise<{ message: string }> {
-    const { id,  oldPassword, newPassword } = changePasswordDto;
-    const user = await this.UsersRepository.findOne({
-      where: { id },
-    });
+    const { oldPassword, newPassword } = changePasswordDto;
+
+    const user = await this.UsersRepository.findOne({ where: { id: id } });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -63,9 +71,10 @@ export class UserService {
 
     return { message: 'Password changed successfully' };
   }
-  async getProfileById(userId: string) {
+
+  async getProfileById(uuid: string) {
     const user = await this.UsersRepository.findOne({
-      where: { id: userId },
+      where: { id: uuid },
       select: [
         'id', 
         'username', 
@@ -78,11 +87,11 @@ export class UserService {
         'avatar'
       ]
     });
-  
+
     if (!user) {
       throw new NotFoundException('Không tìm thấy người dùng');
     }
-  
+
     return user;
   }
 
@@ -96,5 +105,4 @@ export class UserService {
 
     return this.UsersRepository.save(user);
   }
-
 }
