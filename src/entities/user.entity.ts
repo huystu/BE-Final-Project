@@ -26,14 +26,14 @@ export class User {
 
   @Column({ type: 'varchar', length: 255 })
   password: string;
-  
+
   @Column({ type: 'varchar', nullable: true })
   fullName: string;
 
   @Column({ type: 'varchar', nullable: true })
   address: string;
 
-  @Column({ type: 'varchar'})
+  @Column({ type: 'varchar' })
   phone: number;
 
   @Column({ type: 'varchar', nullable: true })
@@ -44,6 +44,9 @@ export class User {
 
   @Column({ type: 'varchar', nullable: true })
   avatar: string;
+
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
 
   @OneToMany(() => UserRole, (userRole) => userRole.user)
   userRoles: UserRole[];
@@ -56,5 +59,7 @@ export class User {
 
   @OneToOne(() => Cart, (cart) => cart.user)
   cart: Cart;
+
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshToken[];
 }
