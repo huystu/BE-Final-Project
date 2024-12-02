@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from './dto/changePassword.dto';
 import { UpdateProfileDto } from './dto/update-user.dto';
+import { ToggleActiveStatusDto } from './dto/toggleActiveUser.dto';
 
 @Injectable()
 export class UserService {
@@ -34,11 +35,34 @@ export class UserService {
     return this.UsersRepository.find();
   }
   async getUsersById(uuid: string): Promise<User> {
-    return await this.UsersRepository.findOne({
-      where: {
-        id: uuid,
-      },
+    const user = await this.UsersRepository.findOne({
+      where: { id: uuid },
     });
+
+    if (!user || !user.isActive) {
+      throw new NotFoundException('User not found or inactive');
+    }
+
+    return user;
+  }
+
+  async toggleActiveStatus(
+    toggleActiveStatusDto: ToggleActiveStatusDto,
+  ): Promise<{ message: string }> {
+    const { id } = toggleActiveStatusDto;
+
+    const user = await this.UsersRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.isActive = !user.isActive;
+
+    await this.UsersRepository.save(user);
+
+    const status = user.isActive ? 'activated' : 'deactivated';
+    return { message: `User has been ${status}` };
   }
 
   async changePassword(

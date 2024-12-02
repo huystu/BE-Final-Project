@@ -12,6 +12,7 @@ import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ChangePasswordDto } from './dto/changePassword.dto';
 import { UpdateProfileDto } from './dto/update-user.dto';
+import { ToggleActiveStatusDto } from './dto/toggleActiveUser.dto';
 
 @Controller('user')
 // @UseGuards(JwtAuthGuard)
@@ -39,15 +40,23 @@ export class UserController {
     return this.userService.changePassword(userId, changePasswordDto);
   }
 
-  @Get(':id')
-  async getUserById(@Param('id') id: string) {
-    return this.userService.getUsersById(id);
+  @Patch('activeStatus')
+  async toggleActiveStatus(
+    @Body() toggleActiveStatusDto: ToggleActiveStatusDto,
+  ): Promise<{ message: string }> {
+    return this.userService.toggleActiveStatus(toggleActiveStatusDto);
   }
 
+  
   @Put('edit-profile')
   @UseGuards(JwtAuthGuard)
   async editProfile(@Req() req, @Body() updateProfileDto: UpdateProfileDto) {
     console.log('Decoded User:', req.user);
     return this.userService.updateProfile(req.user.id, updateProfileDto);
+  
+  }
+  @Get(':id')
+  async getUserById(@Param('id') id: string) {
+    return this.userService.getUsersById(id);
   }
 }
