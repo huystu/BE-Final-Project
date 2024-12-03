@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from './dto/changePassword.dto';
 import { UpdateProfileDto } from './dto/update-user.dto';
 import { ToggleActiveStatusDto } from './dto/toggleActiveUser.dto';
+import { DeleteUserDto } from './dto/deleteUser.dto';
 
 @Injectable()
 export class UserService {
@@ -32,7 +33,14 @@ export class UserService {
   }
 
   async getUsers(): Promise<User[]> {
-    return this.UsersRepository.find();
+    return this.UsersRepository.find({
+      where: {
+        isDeleted: false,
+      },
+      order: {
+        username: 'ASC',
+      },
+    });
   }
   async getUsersById(uuid: string): Promise<User> {
     const user = await this.UsersRepository.findOne({
@@ -50,6 +58,7 @@ export class UserService {
     toggleActiveStatusDto: ToggleActiveStatusDto,
   ): Promise<{ message: string }> {
     const { id } = toggleActiveStatusDto;
+    console.log(id, 'asd');
 
     const user = await this.UsersRepository.findOne({ where: { id } });
 
@@ -128,5 +137,23 @@ export class UserService {
     Object.assign(user, updateData);
 
     return this.UsersRepository.save(user);
+  }
+
+  async deleteUser(deleteUserDto: DeleteUserDto,): Promise<{ message: string }> {
+    const { id } = deleteUserDto;
+
+    const user = await this.UsersRepository.findOne({
+      where: {
+        id
+      }
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.isDeleted = true; 
+    await this.UsersRepository.save(user);
+
+    return { message: 'User has been deleted' };
   }
 }

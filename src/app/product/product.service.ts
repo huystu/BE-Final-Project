@@ -70,7 +70,7 @@ export class ProductService {
   async remove(id: string) {
     const product = await this.findOne(id);
     product.isDelete = true;
-    return this.productRepository.save(product);
+    return await this.productRepository.save(product);
   }
 
   async findAll(pageOptionsDto: PageOptionsDto): Promise<PageDto<Product>> {

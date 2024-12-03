@@ -87,7 +87,6 @@ export class AuthService {
       };
     }
 
-    
     if (userWithRole && (await bcrypt.compare(password, user.password))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = userWithRole;
@@ -101,7 +100,7 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_SECRET'),
-      expiresIn: '15m',
+      expiresIn: '24h',
     });
 
     // Tạo refresh token
