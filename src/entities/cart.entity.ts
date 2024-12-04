@@ -26,7 +26,7 @@ export class Cart {
   discount: number;
 
   @Column({ type: 'boolean', default: false })
-  isDelete: number;
+  isDelete: boolean;
 
   @Column({ type: 'float', default: 0, nullable: true })
   price: number;

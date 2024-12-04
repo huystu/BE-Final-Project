@@ -58,7 +58,6 @@ export class UserService {
     toggleActiveStatusDto: ToggleActiveStatusDto,
   ): Promise<{ message: string }> {
     const { id } = toggleActiveStatusDto;
-    console.log(id, 'asd');
 
     const user = await this.UsersRepository.findOne({ where: { id } });
 
