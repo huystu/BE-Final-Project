@@ -47,6 +47,7 @@ export class Product {
 
   @ManyToOne(() => Category, (category) => category.products)
   category: Category;
+  
   @OneToMany(() => CartTransaction, (transaction) => transaction.cart) // Thêm quan hệ
   transactions: CartTransaction[];
   @CreateDateColumn()

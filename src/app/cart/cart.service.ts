@@ -42,6 +42,20 @@ export class CartService {
     return currentCart;
   }
 
+  async getCartItemsByUserId(userId: string): Promise<CartTransaction[]> {
+    
+    const cart = await this.cartRepository.findOne({
+      where: { user: { id: userId }, isDelete: false },
+      relations: ['transactions', 'transactions.product'], 
+    });
+
+    if (!cart) {
+      throw new NotFoundException(`Cart for user with ID ${userId} not found`);
+    }
+
+    return cart.transactions;
+  }
+
   async addProductToCart(
     cartId: string,
     addProductDto: AddProductToCartDto,
@@ -58,9 +72,10 @@ export class CartService {
 
     if (missingIds.length > 0) {
       throw new NotFoundException(
-        `Product with ID $${missingIds.join(', ')} not found`,
+        `Product with ID ${missingIds.join(', ')} not found`,
       );
     }
+    
 
     const currentCart = await this.cartRepository.findOne({
       where: {
@@ -194,7 +209,7 @@ export class CartService {
 
     orderDetails.quantity += 1;
     currentProduct.quantity -= 1;
-    orderDetails.price = orderDetails.quantity * currentProduct.price
+    orderDetails.price = orderDetails.quantity * currentProduct.price;
 
     await this.cartTransactionRepository.save(orderDetails);
     await this.productRepository.save(currentProduct);

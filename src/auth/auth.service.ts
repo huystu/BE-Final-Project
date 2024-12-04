@@ -87,8 +87,11 @@ export class AuthService {
       };
     }
 
+    if (user && !user.isActive) {
+      throw new UnauthorizedException('Your account has been deactivated.');
+    }
+
     if (userWithRole && (await bcrypt.compare(password, user.password))) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = userWithRole;
       return result;
     }

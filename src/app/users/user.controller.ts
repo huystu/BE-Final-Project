@@ -15,6 +15,8 @@ import { ChangePasswordDto } from './dto/changePassword.dto';
 import { UpdateProfileDto } from './dto/update-user.dto';
 import { ToggleActiveStatusDto } from './dto/toggleActiveUser.dto';
 import { DeleteUserDto } from './dto/deleteUser.dto';
+import { Roles } from 'src/common/decorator/role.decorator';
+import { Role } from 'src/common/enum/role.enum';
 
 @Controller('user')
 // @UseGuards(JwtAuthGuard)
@@ -42,6 +44,7 @@ export class UserController {
     return this.userService.changePassword(userId, changePasswordDto);
   }
 
+  @Roles(Role.Admin)
   @Patch('activeStatus')
   async toggleActiveStatus(
     @Body() toggleActiveStatusDto: ToggleActiveStatusDto,
@@ -56,6 +59,7 @@ export class UserController {
     return this.userService.updateProfile(req.user.id, updateProfileDto);
   }
 
+  @Roles(Role.Admin)
   @Patch('delete')
   async softDeleteUser(
     @Body() deleteUserDto: DeleteUserDto,

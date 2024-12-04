@@ -92,13 +92,12 @@ export class ProductService {
   }
 
   async findAll(pageOptionsDto: PageOptionsDto): Promise<PageDto<Product>> {
-    const { name, page, take, orderBy } = pageOptionsDto;
-    const takeData = take || 10;
-    const skip: number = (page - 1) * take;
+    const { name, orderBy } = pageOptionsDto;
+
     const [result, total] = await this.productRepository.findAndCount({
       where: {
-        name: name ? ILike(`%${name.toLowerCase()}%`) : Like(`%%`),
-        isDelete: false,
+        name: name ? ILike(`%${name.toLowerCase()}%`) : Like(`%%`), 
+        isDelete: false, 
       },
       relations: {
         photos: true,
@@ -107,9 +106,10 @@ export class ProductService {
       order: {
         createdAt: orderBy,
       },
-      skip: skip,
-      take: takeData,
+      skip: pageOptionsDto.skip, 
+      take: pageOptionsDto.take, 
     });
+
     const pageMetaDto = new PageMetaDto(pageOptionsDto, total);
     return new PageDto<Product>(result, pageMetaDto, 'Success');
   }
@@ -125,16 +125,17 @@ export class ProductService {
     });
   }
 
-  async findByCategory(categoryId: string, pageOptionsDto: PageOptionsDto): Promise<PageDto<Product>> {
-    const { name, page, take, orderBy } = pageOptionsDto;
-    const takeData = take || 10;
-    const skip: number = (page - 1) * take;
-  
+  async findByCategory(
+    categoryId: string,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<Product>> {
+    const { name, orderBy } = pageOptionsDto;
+
     const [result, total] = await this.productRepository.findAndCount({
       where: {
-        category: { id: categoryId },
-        name: name ? ILike(`%${name.toLowerCase()}%`) : Like(`%%`),
-        isDelete: false,
+        category: { id: categoryId }, 
+        name: name ? ILike(`%${name.toLowerCase()}%`) : Like(`%%`), 
+        isDelete: false, 
       },
       relations: {
         photos: true,
@@ -143,10 +144,10 @@ export class ProductService {
       order: {
         createdAt: orderBy,
       },
-      skip: skip,
-      take: takeData,
+      skip: pageOptionsDto.skip, 
+      take: pageOptionsDto.take, 
     });
-  
+
     const pageMetaDto = new PageMetaDto(pageOptionsDto, total);
     return new PageDto<Product>(result, pageMetaDto, 'Success');
   }
