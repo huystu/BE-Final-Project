@@ -52,7 +52,8 @@ export class CreateProductDto {
   @ApiProperty({})
   @IsString()
   @IsNotEmpty()
-  url: string;
+  @ArrayMinSize(1)
+  urls: string[];
 
   @ApiProperty({})
   @IsObject()

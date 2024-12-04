@@ -108,16 +108,16 @@ export class UserService {
     const user = await this.UsersRepository.findOne({
       where: { id: uuid },
       select: [
-        'id',
-        'username',
-        'email',
-        'fullName',
-        'address',
-        'phone',
-        'url',
-        'description',
-        'avatar',
-      ],
+        'id', 
+        'username', 
+        'email', 
+        'fullName', 
+        'address', 
+        'phone', 
+        'url', 
+        'description', 
+        'avatar'
+      ]
     });
 
     if (!user) {

@@ -13,6 +13,7 @@ import { MailModule } from './provider/mail/mail.module';
 import { CartModule } from './app/cart/cart.module';
 import { VnpayModule } from './app/payment/vnpay.module';
 import { UploadModule } from './upload/upload.module';
+import { BrandModule } from './app/brand/brand.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UploadModule } from './upload/upload.module';
     CartModule,
     VnpayModule,
     UploadModule,
+    BrandModule,
   ],
   controllers: [AppController],
   providers: [AppService],

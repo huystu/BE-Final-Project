@@ -1,11 +1,10 @@
-/* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PageOptionsDto } from 'src/common/pagination/paginationOptions.dto';
 import { PageDto } from 'src/common/pagination/responsePagination.dto';
 import { Product } from 'src/entities/product.entity';
-//import { User } from 'src/entities/user.entity';
-import { ILike, Like, Repository } from 'typeorm';
+import { ProductPhoto } from 'src/entities/productPhoto.entity';
+import { Between, ILike, Like, Repository } from 'typeorm';
 import { PageMetaDto } from './dto';
 import { Category } from 'src/entities/category.entity';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -18,6 +17,8 @@ export class ProductService {
     private productRepository: Repository<Product>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
+    @InjectRepository(ProductPhoto)
+    private productPhotoRepository: Repository<ProductPhoto>,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -30,10 +31,27 @@ export class ProductService {
       }
 
       const product = this.productRepository.create({
-        ...createProductDto,
+        name: createProductDto.name,
+        price: createProductDto.price,
+        url: createProductDto.urls[0], // Giữ lại url ban đầu để tương thích
+        info: createProductDto.info,
+        quantity: createProductDto.quantity,
         category,
       });
-      return this.productRepository.save(product);
+
+      const savedProduct = await this.productRepository.save(product);
+
+      const productPhotos = createProductDto.urls.map(url => 
+        this.productPhotoRepository.create({ 
+          url, 
+          product: savedProduct 
+        })
+      );
+
+      await this.productPhotoRepository.save(productPhotos);
+
+      // Tải lại sản phẩm để bao gồm ảnh
+      return this.findOne(savedProduct.id);
     } catch (error) {
       console.error('Error creating product:', error);
       throw new Error('Internal server error');
@@ -133,4 +151,17 @@ export class ProductService {
     const pageMetaDto = new PageMetaDto(pageOptionsDto, total);
     return new PageDto<Product>(result, pageMetaDto, 'Success');
   }
+
+  async filterByPrice(minPrice: number, maxPrice: number): Promise<Product[]> {
+    return this.productRepository.find({
+      where: {
+        price: Between(minPrice, maxPrice),
+        isDelete: false,
+      },
+      order: {
+        price: 'ASC', // Sắp xếp tăng dần
+      },
+    });
+  }
+  
 }
