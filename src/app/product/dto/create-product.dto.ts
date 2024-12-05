@@ -4,33 +4,21 @@ import { Type } from 'class-transformer';
 import {
   IsString,
   IsNumber,
-  IsArray,
   IsObject,
   IsUUID,
   IsNotEmpty,
   ValidateNested,
   Min,
   ArrayMinSize,
+  IsArray,
 } from 'class-validator';
+import { CreateVariantDto } from 'src/app/variant/dto/create-variant.dto';
 
-//ProductInfoDto được sử dụng để validate cấu trúc của trường info trong Product entity.
 export class ProductInfoDto {
   @ApiProperty({})
   @IsString()
   @IsNotEmpty()
   description: string;
-
-  @ApiProperty({})
-  @IsArray()
-  @IsString({ each: true })
-  @ArrayMinSize(1)
-  color: string[];
-
-  @ApiProperty({})
-  @IsArray()
-  @IsString({ each: true })
-  @ArrayMinSize(1)
-  size: string[];
 
   @ApiProperty({})
   @IsString()
@@ -50,9 +38,9 @@ export class CreateProductDto {
   price: number;
 
   @ApiProperty({})
-  @IsString()
-  @IsNotEmpty()
+  @IsArray()
   @ArrayMinSize(1)
+  @IsString({ each: true })
   urls: string[];
 
   @ApiProperty({})
@@ -70,4 +58,10 @@ export class CreateProductDto {
   @IsUUID()
   @IsNotEmpty()
   categoryId: string;
+
+  @ApiProperty({ type: [CreateVariantDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateVariantDto)
+  variants: CreateVariantDto[];
 }
