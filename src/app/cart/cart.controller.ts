@@ -32,13 +32,17 @@ export class CartController {
     description:
       'Optional cart ID. If not provided, a new cart will be created.',
   })
-    
   @Post('')
   async addProductToCart(
     @Query('cartId') cartId: string,
     @Body() addProductDto: AddProductToCartDto,
   ): Promise<Cart> {
     return this.cartService.addProductToCart(cartId, addProductDto);
+  }
+
+  @Get('items/:userId')
+  async getCartItemsByUserId(@Param('userId') userId: string) {
+    return this.cartService.getCartItemsByUserId(userId);
   }
 
   @Patch(':id/minus-quantity')
