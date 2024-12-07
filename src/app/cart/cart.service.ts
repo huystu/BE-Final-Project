@@ -1,15 +1,16 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, MoreThan, Repository, Transaction } from 'typeorm';
 import { Cart } from 'src/entities/cart.entity';
-import { Product } from 'src/entities/product.entity';
-import { AddProductToCartDto } from './dto/addProductToCart.dto';
 import { CartTransaction } from 'src/entities/cartTransaction.entity';
+import { Product } from 'src/entities/product.entity';
+import { In, MoreThan, Repository } from 'typeorm';
 import { UserService } from '../users/user.service';
+import { AddProductToCartDto } from './dto/addProductToCart.dto';
+import { UpdateInformationCartDto } from './dto/updateInformationCart.dto';
 
 @Injectable()
 export class CartService {
@@ -43,10 +44,9 @@ export class CartService {
   }
 
   async getCartItemsByUserId(userId: string): Promise<CartTransaction[]> {
-    
     const cart = await this.cartRepository.findOne({
       where: { user: { id: userId }, isDelete: false },
-      relations: ['transactions', 'transactions.product'], 
+      relations: ['transactions', 'transactions.product'],
     });
 
     if (!cart) {
@@ -56,11 +56,45 @@ export class CartService {
     return cart.transactions;
   }
 
+  async getHistoryCart(userId: string): Promise<Cart[]> {
+    const cart = await this.cartRepository.find({
+      where: {
+        user: {
+          id: userId,
+        },
+        // status: In([CartStatus.PROCESS, CartStatus.DONE]),
+      },
+      relations: ['transactions.product'],
+    });
+    return cart;
+  }
+
+  async updateInformationCart({
+    updateCartDto,
+  }: {
+    updateCartDto: UpdateInformationCartDto;
+  }): Promise<Cart> {
+    const { cartId, address } = updateCartDto;
+
+    const currentCart = await this.cartRepository.findOne({
+      where: {
+        cartId: cartId,
+        // status: Not(CartStatus.DONE),
+      },
+    });
+    if (!currentCart) {
+      throw new NotFoundException('Id not Valid');
+    }
+    currentCart.address = address;
+    // currentCart.methodShipping = methodShipping;
+    return await this.cartRepository.save(currentCart);
+  }
+
   async addProductToCart(
-    cartId: string,
+    userId: string,
     addProductDto: AddProductToCartDto,
   ): Promise<Cart> {
-    const { product, userId, discount } = addProductDto;
+    const { product, discount } = addProductDto;
 
     const listProduct = await this.productRepository.find({
       where: { id: In(product), quantity: MoreThan(0) },
@@ -75,11 +109,13 @@ export class CartService {
         `Product with ID ${missingIds.join(', ')} not found`,
       );
     }
-    
 
     const currentCart = await this.cartRepository.findOne({
       where: {
-        cartId: cartId,
+        user: {
+          id: userId,
+        },
+        // status: CartStatus.PROCESS,
       },
       relations: ['transactions'],
     });
@@ -103,7 +139,7 @@ export class CartService {
 
       await this.cartRepository.save(newCart);
       await this.cartTransactionRepository.save(listOrderDetails);
-      await this.caculateTotalPrice(cartId);
+      await this.caculateTotalPrice(currentCart.cartId);
 
       return await this.cartRepository.findOne({
         where: { cartId: newCart.cartId },
@@ -151,7 +187,7 @@ export class CartService {
         }
       }
     }
-    await this.caculateTotalPrice(cartId);
+    await this.caculateTotalPrice(currentCart.cartId);
   }
 
   async minusQuantityOrderDetails(id: string): Promise<boolean> {

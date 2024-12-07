@@ -6,9 +6,11 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { Cart } from './cart.entity';
 import { Product } from './product.entity';
+import { Order } from './order.entity';
 
 @Entity('cart_transaction')
 export class CartTransaction {
@@ -16,10 +18,20 @@ export class CartTransaction {
   transactionId: string;
 
   @ManyToOne(() => Cart, (cart) => cart.transactions, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'cartId' }) // Đặt tên cột khóa ngoại là "orderId"
   cart: Cart;
 
-  @ManyToOne(() => Product, (product) => product.transactions, {onDelete: 'CASCADE'})
+  @ManyToOne(() => Product, (product) => product.transactions, {
+    onDelete: 'CASCADE',
+  })
   product: Product;
+
+  @ManyToOne(() => Order, (order) => order.transactions, {
+    onDelete: 'CASCADE', // Xóa giao dịch khi đơn hàng bị xóa
+    nullable: true, // Giao dịch phải thuộc về một đơn hàng
+  })
+  @JoinColumn({ name: 'orderId' }) // Đặt tên cột khóa ngoại là "orderId"
+  order: Order; // Liên kết với đơn hàng
 
   @Column({ type: 'boolean', default: false })
   isDelete: number;
