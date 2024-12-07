@@ -40,25 +40,33 @@ export class ProductController {
     private variantRepository: Repository<Variant>,
   ) {}
 
-  @Get('filter')
-  async filterProductsByQueryParams(
-    @Query('q') q: string,
-    @Query('minPrice') minPrice: number,
-    @Query('maxPrice') maxPrice: number,
-    @Query('page') page: number,
-    @Query('limit') limit: number,
-    @Query('categoryId') categoryId: string,
-    @Query('orderBy') orderBy: 'ASC' | 'DESC',
-  ) {
-    const filterDto: FilterDto = {
-      q,
-      minPrice,
-      maxPrice,
-      page: page || 1,
-      limit: limit || 10,
-      orderBy: orderBy || 'DESC',
-      categoryId,
-    };
+  // truyền param
+  // @Get('filter')
+  // async filterProductsByQueryParams(
+  //   @Query('q') q: string,
+  //   @Query('minPrice') minPrice: number,
+  //   @Query('maxPrice') maxPrice: number,
+  //   @Query('page') page: number,
+  //   @Query('limit') limit: number,
+  //   @Query('categoryId') categoryId: string,
+  //   @Query('orderBy') orderBy: 'ASC' | 'DESC',
+  // ) {
+  //   const filterDto: FilterDto = {
+  //     q,
+  //     minPrice,
+  //     maxPrice,
+  //     page: page || 1,
+  //     limit: limit || 10,
+  //     orderBy: orderBy || 'DESC',
+  //     categoryId,
+  //   };
+  //   return this.productService.filterProducts(filterDto);
+  // }
+
+  //truyền body
+  @Post('filter')
+  async filterProduct(@Body() filterDto: FilterDto) {
+    console.log('Recieved filterDto:', filterDto);
     return this.productService.filterProducts(filterDto);
   }
 

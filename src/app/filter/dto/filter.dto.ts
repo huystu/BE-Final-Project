@@ -1,11 +1,11 @@
 /* eslint-disable prettier/prettier */
 import { ApiProperty } from "@nestjs/swagger";
-import { IsIn, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsIn, IsNumber, IsOptional, IsString, IsUUID } from "class-validator";
 export class FilterDto {
     @ApiProperty({required: false})
     @IsOptional()
     @IsString()
-    q?: string;
+    search?: string;
     
     @ApiProperty({required: false})
     @IsOptional()
@@ -40,11 +40,12 @@ export class FilterDto {
     @ApiProperty({required: false})
     @IsOptional()
     @IsString()
+    @IsUUID()
     categoryId?: string;
 
-    @ApiProperty({required: false})
-    @IsOptional()
-    @IsString()
-    brandId?: string;
+    // @ApiProperty({required: false})
+    // @IsOptional()
+    // @IsString()
+    // brandId?: string;
 
 }

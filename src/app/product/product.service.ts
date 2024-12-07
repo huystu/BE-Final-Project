@@ -189,8 +189,9 @@ export class ProductService {
   }
 
   async filterProducts(filterDto: FilterDto): Promise<PageDto<Product>> {
+    console.log('Filter DTO:', filterDto);
     const {
-      q,
+      search,
       minPrice,
       maxPrice,
       page = 1,
@@ -209,10 +210,10 @@ export class ProductService {
       .leftJoinAndSelect('product.photos', 'photos')
       .where('product.isDelete = :isDelete', { isDelete: false });
 
-    if (q) {
+    if (search) {
       queryBuilder.andWhere(new Brackets(qb => {
-        qb.where('LOWER(product.name::text) LIKE :q', { q: `%${q.toLowerCase()}%` })
-          .orWhere('LOWER(product.info::text) LIKE :q', { q: `%${q.toLowerCase()}%` });
+        qb.where('LOWER(product.name::text) LIKE :search', { search: `%${search.toLowerCase()}%` })
+          .orWhere('LOWER(product.info::text) LIKE :search', { search: `%${search.toLowerCase()}%` });
       }));
     }
 
