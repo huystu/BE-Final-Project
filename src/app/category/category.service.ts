@@ -25,6 +25,10 @@ export class CategoryService {
     });
   }
 
+  async findAllWithPaginate(){
+    //wait
+  }
+
   async findOne(id: string) {
     const category = await this.categoryRepository.findOne({
       where: { id },

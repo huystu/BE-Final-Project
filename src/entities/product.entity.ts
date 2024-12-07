@@ -11,6 +11,7 @@ import {
 import { Category } from './category.entity';
 import { ProductPhoto } from './productPhoto.entity';
 import { CartTransaction } from './cartTransaction.entity';
+import {Brand} from './brand.entity'
 
 export interface ProductInfo {
   description: string;
@@ -54,4 +55,7 @@ export class Product {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne(() => Brand, (brand) => brand.products)
+  brand: Brand;
 }

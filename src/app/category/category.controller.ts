@@ -21,6 +21,13 @@ export class CategoryController {
   findAll() {
     return this.categoryService.findAll();
   }
+  
+ 
+  @Get('/paginate')
+  findAllWithPaginate() {
+    return this.categoryService.findAllWithPaginate();
+  }
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {

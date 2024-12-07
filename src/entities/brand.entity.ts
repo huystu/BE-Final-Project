@@ -1,4 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany,
+} from 'typeorm';
+import { Product } from './product.entity';
+
+
 
 @Entity('brands')
 export class Brand {
@@ -8,15 +12,15 @@ export class Brand {
   @Column({ unique: true })
   name: string;
 
-  @Column({ nullable: true })
-  description: string;
-
-  @Column({ nullable: true })
-  logoUrl: string;
+  @Column({ default: false })
+  isDelete: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Product, (product) => product.brand)
+  products: Product[];
 }
