@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, ILike, Like } from 'typeorm';
+import { Repository, Between, ILike, Like, Brackets } from 'typeorm';
 import { Product } from 'src/entities/product.entity';
 import { ProductPhoto } from 'src/entities/productPhoto.entity';
 import { Category } from 'src/entities/category.entity';
@@ -11,7 +11,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { PageOptionsDto } from 'src/common/pagination/paginationOptions.dto';
 import { PageDto } from 'src/common/pagination/responsePagination.dto';
 import { PageMetaDto } from './dto';
-
+import { FilterDto } from '../filter/dto/filter.dto';
 @Injectable()
 export class ProductService {
   constructor(
@@ -171,7 +171,7 @@ export class ProductService {
         isDelete: false,
       },
       order: {
-        price: 'ASC', // Sắp xếp tăng dần
+        price: 'ASC', 
       },
     });
   }
@@ -187,4 +187,62 @@ export class ProductService {
 
     return variant.price;
   }
+
+  async filterProducts(filterDto: FilterDto): Promise<PageDto<Product>> {
+    const {
+      q,
+      minPrice,
+      maxPrice,
+      page = 1,
+      limit = 10,
+      take,
+      orderBy = 'DESC',
+      categoryId,
+      //brandId
+    } = filterDto;
+
+    const validOrder = orderBy === 'ASC' ? 'ASC' : 'DESC';
+
+    const queryBuilder = this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.photos', 'photos')
+      .where('product.isDelete = :isDelete', { isDelete: false });
+
+    if (q) {
+      queryBuilder.andWhere(new Brackets(qb => {
+        qb.where('LOWER(product.name::text) LIKE :q', { q: `%${q.toLowerCase()}%` })
+          .orWhere('LOWER(product.info::text) LIKE :q', { q: `%${q.toLowerCase()}%` });
+      }));
+    }
+
+    if (minPrice !== undefined && maxPrice !== undefined) {
+      queryBuilder.andWhere('product.price BETWEEN :minPrice AND :maxPrice', { minPrice, maxPrice });
+    }
+
+    if (categoryId) {
+      queryBuilder.andWhere('category.id = :categoryId', { categoryId });
+    }
+
+    queryBuilder.orderBy('product.createdAt', validOrder);
+
+    const pageNum = page > 0 ? page : 1;
+    const pageSize = take || limit;
+
+    queryBuilder.skip((pageNum - 1) * pageSize);
+    queryBuilder.take(pageSize);
+
+    const [result, total] = await queryBuilder.getManyAndCount();
+
+    const pageMetaDto = new PageMetaDto(
+      {
+        page: pageNum,
+        take: pageSize,
+        skip: (pageNum - 1) * pageSize
+      },
+      total
+    );
+
+    return new PageDto<Product>(result, pageMetaDto, 'Success');
+}
 }

@@ -22,6 +22,7 @@ import { Repository } from 'typeorm';
 import { Category } from 'src/entities/category.entity';
 import { ProductPhoto } from 'src/entities/productPhoto.entity';
 import { Variant } from 'src/entities/variant.entity';
+import { FilterDto } from '../filter/dto/filter.dto';
 
 @Controller('product')
 @ApiTags('product')
@@ -39,21 +40,36 @@ export class ProductController {
     private variantRepository: Repository<Variant>,
   ) {}
 
+  @Get('filter')
+  async filterProductsByQueryParams(
+    @Query('q') q: string,
+    @Query('minPrice') minPrice: number,
+    @Query('maxPrice') maxPrice: number,
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('categoryId') categoryId: string,
+    @Query('orderBy') orderBy: 'ASC' | 'DESC',
+  ) {
+    const filterDto: FilterDto = {
+      q,
+      minPrice,
+      maxPrice,
+      page: page || 1,
+      limit: limit || 10,
+      orderBy: orderBy || 'DESC',
+      categoryId,
+    };
+    return this.productService.filterProducts(filterDto);
+  }
+
+
+
 
   @Post() 
   async create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
   }
 
-  @Get('filter')
-async filterByPrice(
-  @Query('minPrice') minPrice?: string,
-  @Query('maxPrice') maxPrice?: string,
-): Promise<Product[]> {
-  const min = minPrice ? parseFloat(minPrice) : 0; 
-  const max = maxPrice ? parseFloat(maxPrice) : Number.MAX_VALUE; 
-  return this.productService.filterByPrice(min, max);
-}
 
   @Patch(':id')
   async update(
@@ -87,5 +103,4 @@ async filterByPrice(
 async getPrice(@Param('productId') productId: string, @Query('size') size: string, @Query('color') color: string) {
   return this.productService.getPriceBySizeAndColor(productId, size, color);
 }
-
 }
