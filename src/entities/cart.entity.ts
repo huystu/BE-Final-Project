@@ -6,6 +6,8 @@ import {
   OneToMany,
   OneToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { CartTransaction } from './cartTransaction.entity';
@@ -31,7 +33,12 @@ export class Cart {
   @Column({ type: 'float', default: 0, nullable: true })
   price: number;
 
+  @Column({ nullable: true })
+  address: string;
+
+  @CreateDateColumn({ type: 'date', nullable: true })
+  createdAt: Date;
+
   @OneToMany(() => CartTransaction, (transaction) => transaction.cart)
   transactions: CartTransaction[];
-
 }

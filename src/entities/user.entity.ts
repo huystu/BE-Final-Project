@@ -12,6 +12,8 @@ import { Cart } from './cart.entity';
 import { RefreshToken } from './refreshtoken.entity';
 import { UserRole } from './userRole.entity';
 import { Review } from './review.entity';
+import { Address} from './address.entity';
+import { Order } from './order.entity';
 // import { Role } from './role.entity';
 
 @Entity('users')
@@ -49,7 +51,7 @@ export class User {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
-  @Column({ default: false }) 
+  @Column({ default: false })
   isDeleted: boolean;
 
   @OneToMany(() => UserRole, (userRole) => userRole.user)
@@ -70,4 +72,9 @@ export class User {
   @OneToMany(() => Review, (review) => review.user)
   reviews: Review[];
 
+  @OneToMany(() => Address, (address) => address.user)
+  addresses: Address[];
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 }
