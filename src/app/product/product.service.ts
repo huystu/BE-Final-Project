@@ -64,12 +64,6 @@ export class ProductService {
     return this.findOne(savedProduct.id);
   }
 
-
-
-
-
-  
-
   async findOne(id: string) {
     const product = await this.productRepository.findOne({
       where: { id, isDelete: false },
@@ -108,8 +102,8 @@ export class ProductService {
 
     const [result, total] = await this.productRepository.findAndCount({
       where: {
-        name: name ? ILike(`%${name.toLowerCase()}%`) : Like(`%%`), 
-        isDelete: false, 
+        name: name ? ILike(`%${name.toLowerCase()}%`) : Like(`%%`),
+        isDelete: false,
       },
       relations: {
         photos: true,
@@ -118,8 +112,8 @@ export class ProductService {
       order: {
         createdAt: orderBy,
       },
-      skip: pageOptionsDto.skip, 
-      take: pageOptionsDto.take, 
+      skip: pageOptionsDto.skip,
+      take: pageOptionsDto.take,
     });
 
     const pageMetaDto = new PageMetaDto(pageOptionsDto, total);
@@ -133,6 +127,7 @@ export class ProductService {
       },
       relations: {
         photos: true,
+        category: true,
       },
     });
   }
@@ -145,9 +140,9 @@ export class ProductService {
 
     const [result, total] = await this.productRepository.findAndCount({
       where: {
-        category: { id: categoryId }, 
-        name: name ? ILike(`%${name.toLowerCase()}%`) : Like(`%%`), 
-        isDelete: false, 
+        category: { id: categoryId },
+        name: name ? ILike(`%${name.toLowerCase()}%`) : Like(`%%`),
+        isDelete: false,
       },
       relations: {
         photos: true,
@@ -156,8 +151,8 @@ export class ProductService {
       order: {
         createdAt: orderBy,
       },
-      skip: pageOptionsDto.skip, 
-      take: pageOptionsDto.take, 
+      skip: pageOptionsDto.skip,
+      take: pageOptionsDto.take,
     });
 
     const pageMetaDto = new PageMetaDto(pageOptionsDto, total);
