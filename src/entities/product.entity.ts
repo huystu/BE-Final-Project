@@ -11,12 +11,12 @@ import {
 import { Category } from './category.entity';
 import { ProductPhoto } from './productPhoto.entity';
 import { CartTransaction } from './cartTransaction.entity';
-import {Brand} from './brand.entity'
+import { Variant } from './variant.entity';
+import { Brand } from './brand.entity';
+
 
 export interface ProductInfo {
   description: string;
-  color: Array<string>;
-  size: Array<string>;
   policy: string;
 }
 
@@ -48,8 +48,13 @@ export class Product {
 
   @ManyToOne(() => Category, (category) => category.products)
   category: Category;
-  @OneToMany(() => CartTransaction, (transaction) => transaction.cart) // Thêm quan hệ
+
+  @OneToMany(() => CartTransaction, (transaction) => transaction.cart)
   transactions: CartTransaction[];
+
+  @OneToMany(() => Variant, (variant) => variant.product)
+  variants: Variant[];
+
   @CreateDateColumn()
   createdAt: Date;
 

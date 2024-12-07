@@ -13,6 +13,7 @@ async function bootstrap() {
     .setTitle('Ecomerce example')
     .setDescription('The Ecomerce API description')
     .setVersion('1.0')
+    .addBearerAuth()
     .addTag('Ecomerce')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);

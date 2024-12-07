@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -12,6 +13,10 @@ import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ChangePasswordDto } from './dto/changePassword.dto';
 import { UpdateProfileDto } from './dto/update-user.dto';
+import { ToggleActiveStatusDto } from './dto/toggleActiveUser.dto';
+import { DeleteUserDto } from './dto/deleteUser.dto';
+import { Roles } from 'src/common/decorator/role.decorator';
+import { Role } from 'src/common/enum/role.enum';
 
 @Controller('user')
 // @UseGuards(JwtAuthGuard)
@@ -39,9 +44,12 @@ export class UserController {
     return this.userService.changePassword(userId, changePasswordDto);
   }
 
-  @Get(':id')
-  async getUserById(@Param('id') id: string) {
-    return this.userService.getUsersById(id);
+  @Roles(Role.Admin)
+  @Patch('activeStatus')
+  async toggleActiveStatus(
+    @Body() toggleActiveStatusDto: ToggleActiveStatusDto,
+  ): Promise<{ message: string }> {
+    return this.userService.toggleActiveStatus(toggleActiveStatusDto);
   }
 
   @Put('edit-profile')
@@ -49,5 +57,18 @@ export class UserController {
   async editProfile(@Req() req, @Body() updateProfileDto: UpdateProfileDto) {
     console.log('Decoded User:', req.user);
     return this.userService.updateProfile(req.user.id, updateProfileDto);
+  }
+
+  @Roles(Role.Admin)
+  @Patch('delete')
+  async softDeleteUser(
+    @Body() deleteUserDto: DeleteUserDto,
+  ): Promise<{ message: string }> {
+    return this.userService.deleteUser(deleteUserDto);
+  }
+
+  @Get(':id')
+  async getUserById(@Param('id') id: string) {
+    return this.userService.getUsersById(id);
   }
 }

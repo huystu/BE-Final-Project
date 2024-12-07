@@ -17,12 +17,28 @@ import { PageOptionsDto } from 'src/common/pagination/paginationOptions.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from 'src/entities/product.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Category } from 'src/entities/category.entity';
+import { ProductPhoto } from 'src/entities/productPhoto.entity';
+import { Variant } from 'src/entities/variant.entity';
 
 @Controller('product')
 @ApiTags('product')
 //@UseGuards(JwtAuthGuard)
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    @InjectRepository(Product) 
+    private productRepository: Repository<Product>,
+    @InjectRepository(Category) 
+    private categoryRepository: Repository<Category>,
+    @InjectRepository(ProductPhoto) 
+    private productPhotoRepository: Repository<ProductPhoto>,
+    @InjectRepository(Variant) 
+    private variantRepository: Repository<Variant>,
+  ) {}
+
 
   @Post() 
   async create(@Body() createProductDto: CreateProductDto) {
@@ -65,6 +81,11 @@ async filterByPrice(
   @Get('category/:id')
   async getByCategory(@Param('id') categoryId: string, @Query() pageOptionsDto: PageOptionsDto) {
   return this.productService.findByCategory(categoryId, pageOptionsDto);
+}
+
+@Get(':productId/price')
+async getPrice(@Param('productId') productId: string, @Query('size') size: string, @Query('color') color: string) {
+  return this.productService.getPriceBySizeAndColor(productId, size, color);
 }
 
 }

@@ -10,6 +10,8 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from './dto/changePassword.dto';
 import { UpdateProfileDto } from './dto/update-user.dto';
+import { ToggleActiveStatusDto } from './dto/toggleActiveUser.dto';
+import { DeleteUserDto } from './dto/deleteUser.dto';
 
 @Injectable()
 export class UserService {
@@ -31,14 +33,44 @@ export class UserService {
   }
 
   async getUsers(): Promise<User[]> {
-    return this.UsersRepository.find();
-  }
-  async getUsersById(uuid: string): Promise<User> {
-    return await this.UsersRepository.findOne({
+    return this.UsersRepository.find({
       where: {
-        id: uuid,
+        isDeleted: false,
+      },
+      order: {
+        username: 'ASC',
       },
     });
+  }
+  async getUsersById(uuid: string): Promise<User> {
+    const user = await this.UsersRepository.findOne({
+      where: { id: uuid },
+    });
+
+    if (!user || !user.isActive) {
+      throw new NotFoundException('User not found or inactive');
+    }
+
+    return user;
+  }
+
+  async toggleActiveStatus(
+    toggleActiveStatusDto: ToggleActiveStatusDto,
+  ): Promise<{ message: string }> {
+    const { id } = toggleActiveStatusDto;
+
+    const user = await this.UsersRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.isActive = !user.isActive;
+
+    await this.UsersRepository.save(user);
+
+    const status = user.isActive ? 'activated' : 'deactivated';
+    return { message: `User has been ${status}` };
   }
 
   async changePassword(
@@ -104,5 +136,23 @@ export class UserService {
     Object.assign(user, updateData);
 
     return this.UsersRepository.save(user);
+  }
+
+  async deleteUser(deleteUserDto: DeleteUserDto,): Promise<{ message: string }> {
+    const { id } = deleteUserDto;
+
+    const user = await this.UsersRepository.findOne({
+      where: {
+        id
+      }
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.isDeleted = true; 
+    await this.UsersRepository.save(user);
+
+    return { message: 'User has been deleted' };
   }
 }

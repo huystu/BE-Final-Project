@@ -14,6 +14,9 @@ import { CartModule } from './app/cart/cart.module';
 import { VnpayModule } from './app/payment/vnpay.module';
 import { UploadModule } from './upload/upload.module';
 import { BrandModule } from './app/brand/brand.module';
+import { AddressModule } from './app/address/address.module';
+import { CouponModule } from './app/coupon/coupon.module';
+import { OrderModule } from './app/order/order.module';
 
 @Module({
   imports: [
@@ -31,6 +34,9 @@ import { BrandModule } from './app/brand/brand.module';
     VnpayModule,
     UploadModule,
     BrandModule,
+    AddressModule,
+    CouponModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

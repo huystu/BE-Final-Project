@@ -9,7 +9,7 @@ export class MailService {
     try {
       await this.mailerService.sendMail({
         to: receive,
-        from: 'quangvunguyen015@gmail.com', // sender address
+        from: 'quangvunguyen153@gmail.com', // sender address
         subject: 'OTP Vetification',
         text: '',
         html: `${code}`,
@@ -18,7 +18,7 @@ export class MailService {
         success: true,
       };
     } catch (error) {
-        console.log(error)
+      console.log(error);
       return {
         success: false,
       };
