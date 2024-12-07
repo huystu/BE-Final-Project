@@ -11,6 +11,7 @@ import {
 import { Cart } from './cart.entity';
 import { RefreshToken } from './refreshtoken.entity';
 import { UserRole } from './userRole.entity';
+import { Review } from './review.entity';
 import { Address} from './address.entity';
 import { Order } from './order.entity';
 // import { Role } from './role.entity';
@@ -67,6 +68,9 @@ export class User {
 
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshToken[];
+
+  @OneToMany(() => Review, (review) => review.user)
+  reviews: Review[];
 
   @OneToMany(() => Address, (address) => address.user)
   addresses: Address[];

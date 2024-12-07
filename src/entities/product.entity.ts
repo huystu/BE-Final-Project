@@ -12,6 +12,7 @@ import { Category } from './category.entity';
 import { ProductPhoto } from './productPhoto.entity';
 import { CartTransaction } from './cartTransaction.entity';
 import { Variant } from './variant.entity';
+import { Review } from './review.entity';
 
 export interface ProductInfo {
   description: string;
@@ -52,6 +53,10 @@ export class Product {
 
   @OneToMany(() => Variant, (variant) => variant.product)
   variants: Variant[];
+
+  @OneToMany(() => Review, (review) => review.product)
+  reviews: Review[];
+
 
   @CreateDateColumn()
   createdAt: Date;
