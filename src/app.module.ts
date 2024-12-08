@@ -17,6 +17,7 @@ import { BrandModule } from './app/brand/brand.module';
 import { AddressModule } from './app/address/address.module';
 import { CouponModule } from './app/coupon/coupon.module';
 import { OrderModule } from './app/order/order.module';
+import { ReviewModule } from './app/review/review.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { OrderModule } from './app/order/order.module';
     AddressModule,
     CouponModule,
     OrderModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],
