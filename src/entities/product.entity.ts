@@ -12,6 +12,8 @@ import { Category } from './category.entity';
 import { ProductPhoto } from './productPhoto.entity';
 import { CartTransaction } from './cartTransaction.entity';
 import { Variant } from './variant.entity';
+import { Brand } from './brand.entity';
+
 import { Review } from './review.entity';
 
 export interface ProductInfo {
@@ -63,4 +65,7 @@ export class Product {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne(() => Brand, (brand) => brand.products)
+  brand: Brand;
 }

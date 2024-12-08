@@ -1,23 +1,40 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { Brand } from 'src/entities/brand.entity';
 import { CreateBrandDto, UpdateBrandDto } from './dto/create-brand.dto';
+import { PageOptionsDto } from 'src/common/pagination/paginationOptions.dto';
+import { PageDto } from 'src/common/pagination/responsePagination.dto';
+import { PageMetaDto } from '../product/dto';
 
 @Injectable()
 export class BrandService {
   constructor(
     @InjectRepository(Brand)
     private brandRepository: Repository<Brand>,
-  ) {}
+  ) { }
 
   async create(createBrandDto: CreateBrandDto): Promise<Brand> {
     const brand = this.brandRepository.create(createBrandDto);
     return this.brandRepository.save(brand);
   }
 
-  async findAll(): Promise<Brand[]> {
-    return this.brandRepository.find();
+  async findAll(pageOptionsDto: PageOptionsDto): Promise<PageDto<Brand>> {
+    const { name, page, take, orderBy } = pageOptionsDto;
+    const skip = (page - 1) * take;
+    const [result, total] = await this.brandRepository.findAndCount({
+      where: {
+        name: name ? Like(`%${name}%`) : undefined,
+      },
+      order: {
+        createdAt: orderBy,
+      },
+      skip,
+      take,
+    });
+
+    const pageMetaDto = new PageMetaDto(pageOptionsDto, total);
+    return new PageDto<Brand>(result, pageMetaDto, 'Success');
   }
 
   async findOne(id: string): Promise<Brand> {
