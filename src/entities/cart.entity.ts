@@ -36,8 +36,11 @@ export class Cart {
   @Column({ nullable: true })
   address: string;
 
-  @CreateDateColumn({ type: 'date', nullable: true })
+  @CreateDateColumn({ type: 'timestamp', nullable: true })
   createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  updateAt: Date;
 
   @OneToMany(() => CartTransaction, (transaction) => transaction.cart)
   transactions: CartTransaction[];

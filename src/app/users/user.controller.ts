@@ -17,6 +17,7 @@ import { ToggleActiveStatusDto } from './dto/toggleActiveUser.dto';
 import { DeleteUserDto } from './dto/deleteUser.dto';
 import { Roles } from 'src/common/decorator/role.decorator';
 import { Role } from 'src/common/enum/role.enum';
+import { UpdateAdminUserDto } from './dto/updateAdminUser.dto';
 
 @Controller('user')
 // @UseGuards(JwtAuthGuard)
@@ -65,6 +66,15 @@ export class UserController {
     @Body() deleteUserDto: DeleteUserDto,
   ): Promise<{ message: string }> {
     return this.userService.deleteUser(deleteUserDto);
+  }
+
+  @Roles(Role.Admin)
+  @Patch(':id')
+  async updateUserByAdmin(
+    @Param('id') userId: string,
+    @Body() updateAdminUserDto: UpdateAdminUserDto,
+  ) {
+    return this.userService.updateUserByAdmin(userId, updateAdminUserDto);
   }
 
   @Get(':id')

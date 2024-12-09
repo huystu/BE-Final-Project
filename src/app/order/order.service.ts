@@ -7,6 +7,7 @@ import { User } from 'src/entities/user.entity';
 import { Address } from 'src/entities/address.entity';
 import { Coupon } from 'src/entities/coupon.entity';
 import { CartTransaction } from 'src/entities/cartTransaction.entity';
+import { UpdateOrderDto } from './dto/updateOrder.dto';
 
 @Injectable()
 export class OrderService {
@@ -84,6 +85,51 @@ export class OrderService {
     // Lưu order vào cơ sở dữ liệu
     return this.orderRepository.save(order);
   }
+
+  async updateOrder(updateOrderDto: UpdateOrderDto): Promise<Order> {
+    const { orderId, status, addressId, couponId, methodShipping } =
+      updateOrderDto;
+
+    const order = await this.orderRepository.findOne({
+      where: { orderId },
+      relations: ['address', 'coupon', 'transactions'], // Lấy các quan hệ
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if (status) {
+      order.status = status;
+    }
+
+    if (addressId) {
+      const address = await this.addressRepository.findOne({
+        where: { addressId },
+      });
+      if (!address) {
+        throw new NotFoundException('Address not found');
+      }
+      order.address = address;
+    }
+
+    if (couponId) {
+      const coupon = await this.couponRepository.findOne({
+        where: { couponId },
+      });
+      if (!coupon) {
+        throw new NotFoundException('Coupon not found');
+      }
+      order.coupon = coupon;
+    }
+
+    if (methodShipping) {
+      order.methodShipping = methodShipping;
+    }
+
+    return this.orderRepository.save(order);
+  }
+
 
   async getOrderById(orderId: string): Promise<Order> {
     const order = await this.orderRepository.findOne({

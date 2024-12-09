@@ -90,104 +90,63 @@ export class CartService {
     return await this.cartRepository.save(currentCart);
   }
 
-  async addProductToCart(
-    userId: string,
-    addProductDto: AddProductToCartDto,
-  ): Promise<Cart> {
-    const { product, discount } = addProductDto;
+  async addProductToCart(addProductDto: AddProductToCartDto): Promise<Cart> {
+    const { userId, productId, quantity, discount } = addProductDto;
 
-    const listProduct = await this.productRepository.find({
-      where: { id: In(product), quantity: MoreThan(0) },
+    let currentCart = await this.cartRepository.findOne({
+      where: { user: { id: userId }, isDelete: false },
+      relations: ['transactions', 'transactions.product'],
     });
-
-    const existingIds = listProduct.map((record) => record.id);
-
-    const missingIds = product.filter((id) => !existingIds.includes(id));
-
-    if (missingIds.length > 0) {
-      throw new NotFoundException(
-        `Product with ID ${missingIds.join(', ')} not found`,
-      );
-    }
-
-    const currentCart = await this.cartRepository.findOne({
-      where: {
-        user: {
-          id: userId,
-        },
-        // status: CartStatus.PROCESS,
-      },
-      relations: ['transactions'],
-    });
-
-    const currentUser = await this.userService.getUsersById(userId);
 
     if (!currentCart) {
-      const newCart = this.cartRepository.create({
+      const currentUser = await this.userService.getUsersById(userId);
+      currentCart = this.cartRepository.create({
         user: currentUser,
-        discount: discount,
+        discount: discount || 0,
       });
-
-      const listOrderDetails = listProduct.map((item) => {
-        return this.cartTransactionRepository.create({
-          cart: newCart,
-          product: item,
-          quantity: 1,
-          price: item.price,
-        });
-      });
-
-      await this.cartRepository.save(newCart);
-      await this.cartTransactionRepository.save(listOrderDetails);
-      await this.caculateTotalPrice(currentCart.cartId);
-
-      return await this.cartRepository.findOne({
-        where: { cartId: newCart.cartId },
-        relations: {
-          transactions: true,
-        },
-      });
-    } else {
-      const listOrderDetailsId = currentCart.transactions.map(
-        (item) => item.transactionId,
-      );
-
-      const listOrderDetails = await this.cartTransactionRepository.find({
-        where: {
-          transactionId: In(listOrderDetailsId),
-        },
-        relations: {
-          product: true,
-        },
-      });
-
-      for (const item of listProduct) {
-        const existingTransaction = listOrderDetails.find(
-          (transaction) => transaction.product.id === item.id,
-        );
-
-        if (existingTransaction) {
-          existingTransaction.quantity += 1;
-          existingTransaction.price = existingTransaction.quantity * item.price;
-          await this.cartTransactionRepository.save(existingTransaction);
-        } else {
-          const newTransaction = this.cartTransactionRepository.create({
-            cart: currentCart,
-            product: item,
-            quantity: 1,
-            price: item.price,
-          });
-
-          if (discount) {
-            currentCart.discount = discount;
-            await this.cartRepository.save(currentCart);
-          }
-
-          await this.cartTransactionRepository.save(newTransaction);
-        }
-      }
+      await this.cartRepository.save(currentCart);
     }
+
+    const product = await this.productRepository.findOne({
+      where: { id: productId, quantity: MoreThan(0) },
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${productId} not found`);
+    }
+
+    const existingTransaction = currentCart.transactions.find(
+      (transaction) => transaction.product.id === productId,
+    );
+
+    if (existingTransaction) {
+    
+      existingTransaction.quantity += quantity;
+      existingTransaction.price = existingTransaction.quantity * product.price;
+      await this.cartTransactionRepository.save(existingTransaction);
+    } else {
+
+      const newTransaction = this.cartTransactionRepository.create({
+        cart: currentCart,
+        product: product,
+        quantity: quantity,
+        price: quantity * product.price,
+      });
+      await this.cartTransactionRepository.save(newTransaction);
+    }
+
+    product.quantity -= quantity;
+    if (product.quantity < 0) {
+      throw new BadRequestException(`Product ${product.name} is out of stock`);
+    }
+    await this.productRepository.save(product);
+
     await this.caculateTotalPrice(currentCart.cartId);
+
+    return await this.cartRepository.findOne({
+      where: { cartId: currentCart.cartId },
+      relations: ['transactions', 'transactions.product'],
+    });
   }
 
   async minusQuantityOrderDetails(id: string): Promise<boolean> {
