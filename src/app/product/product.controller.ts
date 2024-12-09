@@ -9,8 +9,8 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-//import {  UseGuards } from '@nestjs/common';
-//import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import {  UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
 import { ProductService } from './product.service';
 import { PageOptionsDto } from 'src/common/pagination/paginationOptions.dto';
@@ -23,10 +23,12 @@ import { Category } from 'src/entities/category.entity';
 import { ProductPhoto } from 'src/entities/productPhoto.entity';
 import { Variant } from 'src/entities/variant.entity';
 import { FilterDto } from '../filter/dto/filter.dto';
+import { Roles } from 'src/common/decorator/role.decorator';
+import { Role } from 'src/common/enum/role.enum'
 
 @Controller('product')
 @ApiTags('product')
-//@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class ProductController {
   constructor(
     private readonly productService: ProductService,
@@ -40,46 +42,20 @@ export class ProductController {
     private variantRepository: Repository<Variant>,
   ) {}
 
-  // truyền param
-  // @Get('filter')
-  // async filterProductsByQueryParams(
-  //   @Query('q') q: string,
-  //   @Query('minPrice') minPrice: number,
-  //   @Query('maxPrice') maxPrice: number,
-  //   @Query('page') page: number,
-  //   @Query('limit') limit: number,
-  //   @Query('categoryId') categoryId: string,
-  //   @Query('orderBy') orderBy: 'ASC' | 'DESC',
-  // ) {
-  //   const filterDto: FilterDto = {
-  //     q,
-  //     minPrice,
-  //     maxPrice,
-  //     page: page || 1,
-  //     limit: limit || 10,
-  //     orderBy: orderBy || 'DESC',
-  //     categoryId,
-  //   };
-  //   return this.productService.filterProducts(filterDto);
-  // }
-
-  //truyền body
   @Post('filter')
   async filterProduct(@Body() filterDto: FilterDto) {
     console.log('Recieved filterDto:', filterDto);
     return this.productService.filterProducts(filterDto);
   }
 
-
-
-
   @Post() 
+  //@Roles(Role.Admin, Role.Seller)
   async create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
   }
 
-
   @Patch(':id')
+  @Roles(Role.Admin, Role.Seller)
   async update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
@@ -88,6 +64,7 @@ export class ProductController {
   }
 
   @Delete(':id')
+  @Roles(Role.Admin, Role.Seller)
   async remove(@Param('id') id: string) {
     return this.productService.remove(id);
   }

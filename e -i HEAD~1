@@ -1,0 +1,70 @@
+[33m0e14f12[m[33m ([m[1;36mHEAD -> [m[1;32mdevelop[m[33m, [m[1;31morigin/develop[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #27 from huystu/Viper-Review
+[33m2d3b87c[m[33m ([m[1;31morigin/Viper-Review[m[33m, [m[1;32mViper-Review[m[33m)[m pending4
+[33mc4ce749[m pending3
+[33ma19dea9[m Merge branch 'develop' of https://github.com/huystu/BE-Final-Project into Viper-Review
+[33mc050606[m Merge pull request #25 from huystu/Viper-135
+[33md6ebdf1[m[33m ([m[1;31morigin/Viper-135[m[33m)[m Add API Coupon,Addres,Order and Fix APi Cart
+[33mddc5760[m pending2
+[33m65f77fc[m Lưu tạm
+[33m1c522af[m Merge pull request #23 from huystu/Variant
+[33m8950222[m[33m ([m[1;31morigin/Variant[m[33m, [m[1;32mVariant[m[33m)[m Fix conflict
+[33m0dbe825[m Add Variant
+[33mfd7d4ea[m Merge pull request #22 from huystu/Viper-135
+[33mb1ef334[m Merge branch 'develop' of https://github.com/huystu/BE-Final-Project into Viper-135
+[33m2d25e99[m Add API delete user and fix code
+[33m7def989[m Merge pull request #21 from huystu/Viper-135
+[33mcaa89be[m Add API delete user
+[33maf362f6[m Merge pull request #19 from huystu/Viper-APIbrand
+[33me063cc2[m Merge pull request #20 from huystu/Viper-131
+[33mf5209c9[m[33m ([m[1;31morigin/Viper-131[m[33m)[m Add API active user
+[33m4653a0d[m[33m ([m[1;31morigin/Viper-APIbrand[m[33m, [m[1;32mViper-APIbrand[m[33m)[m Fix bug users
+[33mb1e0485[m Fix conflicts Viper 121
+[33m998eb35[m Viper121-APIBrand
+[33m076d24b[m Merge pull request #18 from huystu/Viper-Sub_task_product
+[33m7740e19[m[33m ([m[1;31morigin/Viper-Sub_task_product[m[33m)[m Filter and ListProductImage
+[33m895e9c8[m Merge pull request #17 from huystu/Viper-131
+[33m700e660[m Merge pull request #16 from huystu/Viper-117
+[33m5de2733[m Fix API profile and Fix Roles
+[33mcca3721[m sj
+[33mce66c9e[m[33m ([m[1;31morigin/Viper-117[m[33m)[m Fix ChangePassword
+[33me3b962f[m Merge pull request #15 from huystu/Viper-117
+[33m5792d31[m Fix Register
+[33m14af41d[m Merge pull request #14 from huystu/Viper-117
+[33m5bdda8d[m Add Role
+[33m88aa040[m Merge pull request #13 from huystu/Viper-XX
+[33m6a9e0af[m[33m ([m[1;31morigin/Viper-XX[m[33m)[m add phoneNumber for user and add url image in product
+[33mc598691[m[33m ([m[1;31morigin/Viper-114[m[33m)[m fix user controller
+[33mc0b082f[m no
+[33mf381afb[m no
+[33m75266f9[m Merge pull request #12 from huystu/Viper-114
+[33m6bca548[m Merge pull request #11 from huystu/Viper-127
+[33m32d7e4f[m Merge pull request #10 from huystu/Viper-logicproduct
+[33m83a4e9d[m fix conflict
+[33m4c78e5b[m[33m ([m[1;31morigin/Viper-127[m[33m)[m Viper 127 - validate file upload
+[33m4901c47[m[33m ([m[1;31morigin/Viper-logicproduct[m[33m)[m fix conflict
+[33m958a4a9[m API Order Details
+[33m7fae4e8[m Merge pull request #9 from huystu/Viper-123
+[33m203ead4[m Merge pull request #8 from huystu/Viper-RefreshToken
+[33mbb17cb5[m Viper-logicproduct: add get product by categoryid
+[33m2ef467d[m[33m ([m[1;31morigin/Viper-123[m[33m)[m Task 123 API Upload Image
+[33mbd21523[m[33m ([m[1;31morigin/Viper-RefreshToken[m[33m)[m Viper-RefreshToken: Create RefreshToken
+[33m5eb7c4a[m Merge pull request #6 from huystu/Viper-X
+[33m6632064[m[33m ([m[1;31morigin/Viper-X[m[33m)[m fix conflict
+[33m50b69cb[m Fix generateRandom Password
+[33m0ff3013[m Merge pull request #7 from huystu/Viper-69
+[33mdef7ba5[m[33m ([m[1;31morigin/Viper-69[m[33m)[m Viper-69-70: Api Profile Detail and Api Edit Profile
+[33meaaac49[m feat(VIPER-X): add Change Password for user
+[33m3a36cda[m Merge pull request #5 from huystu/Viper-88
+[33m4ed67e1[m[33m ([m[1;31morigin/Viper-88[m[33m)[m fix conflict yarn.lock and module
+[33m748800d[m Merge pull request #4 from huystu/newpayment
+[33m7164be7[m[33m ([m[1;31morigin/newpayment[m[33m)[m fix conflict in yarn.lock
+[33m218ec56[m feat(VIPER-88_90_91): Add API to add, update, delete product from cart and Calculate total Cart
+[33m6f942c8[m Viper task 95, 96, 97
+[33m9cccff0[m Merge pull request #3 from huystu/Viper-76-78
+[33mb58e63c[m[33m ([m[1;31morigin/Viper-76-78[m[33m)[m Viper-76-78: Api Category and Api Product list
+[33mec5310c[m Merge pull request #2 from huystu/Viper-61
+[33m2cca639[m[33m ([m[1;31morigin/Viper-61[m[33m)[m feat(VIPER-61_66): API for Forgot Password and Search
+[33mdb5bcfa[m Merge pull request #1 from huystu/VIPER-56
+[33md555caa[m[33m ([m[1;31morigin/VIPER-56[m[33m)[m feat(VIPER-56-57): API Login and Register
+[33m98e6caf[m Add database source base
+[33mfe9f237[m first commit
