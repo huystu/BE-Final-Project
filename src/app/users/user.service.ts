@@ -12,6 +12,7 @@ import { ChangePasswordDto } from './dto/changePassword.dto';
 import { UpdateProfileDto } from './dto/update-user.dto';
 import { ToggleActiveStatusDto } from './dto/toggleActiveUser.dto';
 import { DeleteUserDto } from './dto/deleteUser.dto';
+import { UpdateAdminUserDto } from './dto/updateAdminUser.dto';
 
 @Injectable()
 export class UserService {
@@ -108,16 +109,16 @@ export class UserService {
     const user = await this.UsersRepository.findOne({
       where: { id: uuid },
       select: [
-        'id', 
-        'username', 
-        'email', 
-        'fullName', 
-        'address', 
-        'phone', 
-        'url', 
-        'description', 
-        'avatar'
-      ]
+        'id',
+        'username',
+        'email',
+        'fullName',
+        'address',
+        'phone',
+        'url',
+        'description',
+        'avatar',
+      ],
     });
 
     if (!user) {
@@ -138,21 +139,42 @@ export class UserService {
     return this.UsersRepository.save(user);
   }
 
-  async deleteUser(deleteUserDto: DeleteUserDto,): Promise<{ message: string }> {
+  async deleteUser(deleteUserDto: DeleteUserDto): Promise<{ message: string }> {
     const { id } = deleteUserDto;
 
     const user = await this.UsersRepository.findOne({
       where: {
-        id
-      }
+        id,
+      },
     });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    user.isDeleted = true; 
+    user.isDeleted = true;
     await this.UsersRepository.save(user);
 
     return { message: 'User has been deleted' };
+  }
+
+  async updateUserByAdmin(
+    userId: string,
+    updateAdminUserDto: UpdateAdminUserDto,
+  ): Promise<{ message: string }> {
+    const user = await this.UsersRepository.findOne({
+      where: {
+        id: userId
+      }
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    Object.assign(user, updateAdminUserDto);
+
+    await this.UsersRepository.save(user);
+
+    return { message: 'User updated successfully by admin' };
   }
 }

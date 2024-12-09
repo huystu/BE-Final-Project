@@ -18,7 +18,7 @@ export class CartTransaction {
   transactionId: string;
 
   @ManyToOne(() => Cart, (cart) => cart.transactions, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'cartId' }) // Đặt tên cột khóa ngoại là "orderId"
+  @JoinColumn({ name: 'cartId' }) 
   cart: Cart;
 
   @ManyToOne(() => Product, (product) => product.transactions, {
@@ -27,22 +27,24 @@ export class CartTransaction {
   product: Product;
 
   @ManyToOne(() => Order, (order) => order.transactions, {
-    onDelete: 'CASCADE', // Xóa giao dịch khi đơn hàng bị xóa
-    nullable: true, // Giao dịch phải thuộc về một đơn hàng
+    onDelete: 'CASCADE', 
+    nullable: true, 
   })
-  @JoinColumn({ name: 'orderId' }) // Đặt tên cột khóa ngoại là "orderId"
-  order: Order; // Liên kết với đơn hàng
+  @JoinColumn({ name: 'orderId' }) 
+  order: Order; 
 
   @Column({ type: 'boolean', default: false })
   isDelete: number;
+
   @Column({ type: 'int', default: 0 })
   quantity: number;
 
   @Column({ type: 'float', default: 0 })
   price: number;
 
-  @CreateDateColumn({ type: 'date', nullable: true })
+  @CreateDateColumn({ type: 'timestamp', nullable: true })
   createdAt: Date;
-  @UpdateDateColumn({ type: 'date', nullable: true })
+
+  @UpdateDateColumn({ type: 'timestamp', nullable: true })
   updateAt: Date;
 }

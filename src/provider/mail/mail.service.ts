@@ -12,7 +12,7 @@ export class MailService {
         from: 'quangvunguyen153@gmail.com', // sender address
         subject: 'OTP Vetification',
         text: '',
-        html: `${code}`,
+        html: `<h1>Your OTP Code</h1><p>${code}</p>`,
       });
       return {
         success: true,
