@@ -49,7 +49,7 @@ export class ProductController {
   }
 
   @Post() 
-  //@Roles(Role.Admin, Role.Seller)
+  @Roles(Role.Admin, Role.Seller)
   async create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
   }

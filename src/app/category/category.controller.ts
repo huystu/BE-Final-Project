@@ -13,6 +13,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
   @Post()
+  @Roles(Role.Admin, Role.Seller)
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoryService.create(createCategoryDto);
   }
@@ -35,11 +36,13 @@ export class CategoryController {
   }
 
   @Patch(':id')
+  @Roles(Role.Admin, Role.Seller)
   update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
     return this.categoryService.update(id, updateCategoryDto);
   }
 
   @Delete(':id')
+  @Roles(Role.Admin, Role.Seller)
   remove(@Param('id') id: string) {
     return this.categoryService.remove(id);
   }
