@@ -12,6 +12,7 @@ import { PageOptionsDto } from 'src/common/pagination/paginationOptions.dto';
 import { PageDto } from 'src/common/pagination/responsePagination.dto';
 import { PageMetaDto } from './dto';
 import { FilterDto } from '../filter/dto/filter.dto';
+//import { Color } from '../variant/dto/create-variant.dto';
 @Injectable()
 export class ProductService {
   constructor(
@@ -54,11 +55,11 @@ export class ProductService {
 
     await this.productPhotoRepository.save(productPhotos);
 
-    // Tạo các biến thể Variant
+    //Tạo các biến thể Variant
     const variants = createProductDto.variants.map(variantDto =>
       this.variantRepository.create({ ...variantDto, product: savedProduct })
     );
-
+    
     await this.variantRepository.save(variants);
 
     return this.findOne(savedProduct.id);
