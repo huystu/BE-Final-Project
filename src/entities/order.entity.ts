@@ -42,13 +42,19 @@ export class Order {
   @JoinColumn({ name: 'couponId' })
   coupon?: Coupon; // Liên kết với Coupon (cho phép null)
 
-  @OneToMany(() => CartTransaction, (cartTransaction) => cartTransaction.order, {
-    cascade: true, // Tự động lưu giao dịch giỏ hàng khi lưu đơn hàng
-    onDelete: 'CASCADE', // Xóa các giao dịch khi xóa đơn hàng
-    nullable: true
-  })
-  transactions: CartTransaction[]; // Liên kết với danh sách giao dịch giỏ hàng}
+  @OneToMany(
+    () => CartTransaction,
+    (cartTransaction) => cartTransaction.order,
+    {
+      cascade: true,
+      onDelete: 'CASCADE',
+      nullable: true,
+    },
+  )
+  transactions: CartTransaction[];
 
+  @Column({ type: 'float' })
+  price: number;
 
   @Column({
     type: 'enum',

@@ -244,6 +244,24 @@ export class CartService {
     return await this.cartRepository.save(currentCart);
   }
 
+  async getTotalQuantityByUserId(userId: string): Promise<number> {
+    const currentCart = await this.cartRepository.findOne({
+      where: { user: { id: userId }, isDelete: false },
+      relations: ['transactions'], 
+    });
+
+    if (!currentCart) {
+      throw new NotFoundException(`Cart for user with ID ${userId} not found`);
+    }
+
+    const totalQuantity = currentCart.transactions.reduce(
+      (total, transaction) => total + transaction.quantity,
+      0,
+    );
+
+    return totalQuantity;
+  }
+
   async deleteProduct(id: string): Promise<CartTransaction> {
     const currentProductInCart = await this.cartTransactionRepository.findOne({
       where: {

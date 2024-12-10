@@ -23,6 +23,9 @@ export class Coupon {
   @Column({ type: 'boolean', default: true })
   isActive: boolean; // Trạng thái hoạt động
 
+  @Column({ type: 'int', default: 0 })
+  quantity: number; // Trạng thái hoạt động
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

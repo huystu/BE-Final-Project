@@ -1,16 +1,23 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductPhoto } from 'src/entities/productPhoto.entity';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import * as sharp from 'sharp';
 import { Readable } from 'stream';
+import { Product } from 'src/entities/product.entity';
 
 @Injectable()
 export class ProductPhotoService {
   constructor(
     @InjectRepository(ProductPhoto)
     private readonly productPhotoRepository: Repository<ProductPhoto>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
   ) {}
 
   private validateFile(file: Express.Multer.File): void {
@@ -50,14 +57,25 @@ export class ProductPhotoService {
         stream.pipe(upload);
       },
     );
+    const currentProduct = await this.productRepository.findOne({
+      where: {
+        id: productId,
+      },
+    });
+    if (!currentProduct) {
+      throw new NotFoundException('Category not found');
+    }
 
+    console.log(currentProduct, productId);
     // Lưu thông tin ảnh vào DB
-    const photo = this.productPhotoRepository.create({
+    const photo = await this.productPhotoRepository.create({
+      product: { id: productId } as Product,
       url: uploadResult.secure_url,
-      product: { id: productId } as any, // Liên kết ảnh với sản phẩm
     });
 
-    return this.productPhotoRepository.save(photo);
+    console.log(photo);
+
+    return await this.productPhotoRepository.save(photo);
   }
 
   // Upload nhiều ảnh và lưu vào DB
@@ -74,5 +92,24 @@ export class ProductPhotoService {
     );
 
     return Promise.all(uploadPromises);
+  }
+
+
+  // Upload nhiều ảnh và lưu vào DB
+  async removePhotoById(
+   photoId: string
+  ) {
+    const photo = await this.productPhotoRepository.findOne({
+      where: {
+        id: photoId,
+      },
+    });
+
+    if (!photo) {
+      throw new NotFoundException('photo not found');
+    }
+
+
+    return await this.productPhotoRepository.remove(photo);
   }
 }

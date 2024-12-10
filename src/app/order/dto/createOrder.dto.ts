@@ -15,8 +15,7 @@ export class CreateOrderDto {
   userId: string; // ID của người dùng (bắt buộc)
 
   @IsNotEmpty()
-  listProductId: string[];
-  
+  listCartTransactionId: string[];
 
   @IsUUID()
   @IsNotEmpty()
@@ -31,5 +30,4 @@ export class CreateOrderDto {
 
   @Optional()
   orderStatus: OrderStatus;
-
 }

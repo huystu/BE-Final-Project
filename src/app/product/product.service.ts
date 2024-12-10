@@ -81,8 +81,18 @@ export class ProductService {
     return product;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
-    const product = await this.findOne(id);
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+    files: Express.Multer.File[],
+  ): Promise<Product> {
+    const product = await this.productRepository.findOne({
+      where: { id },
+    });
+
+    if (files && files.length > 0) {
+      await this.productPhotoService.uploadAndSaveMultiplePhotos(files, id);
+    }
 
     if (updateProductDto.categoryId) {
       const category = await this.categoryRepository.findOne({
@@ -94,7 +104,8 @@ export class ProductService {
       product.category = category;
     }
     Object.assign(product, updateProductDto);
-    return this.productRepository.save(product);
+    await this.productRepository.save(product);
+    return this.findOne(product.id);
   }
 
   async remove(id: string) {
@@ -204,7 +215,7 @@ export class ProductService {
       limit = 10,
       take,
       orderBy = 'DESC',
-      categoryId= [],
+      categoryId = [],
       // brandId= [],
     } = filterDto;
 

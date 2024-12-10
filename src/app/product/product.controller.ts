@@ -32,7 +32,7 @@ import { plainToClass } from 'class-transformer';
 
 @Controller('product')
 @ApiTags('product')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export class ProductController {
   constructor(
     private readonly productService: ProductService,
@@ -76,11 +76,13 @@ export class ProductController {
 
   @Patch(':id')
   @Roles(Role.Admin, Role.Seller)
+  @UseInterceptors(FilesInterceptor('files'))
   async update(
     @Param('id') id: string,
+    @UploadedFiles() files: Express.Multer.File[],
     @Body() updateProductDto: UpdateProductDto,
   ) {
-    return this.productService.update(id, updateProductDto);
+    return this.productService.update(id, updateProductDto, files);
   }
 
   @Delete(':id')
