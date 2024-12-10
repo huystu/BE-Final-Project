@@ -41,11 +41,11 @@ export class FilterDto {
     @IsOptional()
     @IsString()
     @IsUUID()
-    categoryId?: string;
+    categoryId?: string[];
 
-    // @ApiProperty({required: false})
-    // @IsOptional()
-    // @IsString()
-    // brandId?: string;
+    @ApiProperty({required: false})
+    @IsOptional()
+    @IsString()
+    brandId?: string[];
 
 }
