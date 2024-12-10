@@ -72,21 +72,16 @@ export class UploadService {
 
       return new Promise<UploadApiResponse>((resolve, reject) => {
         const upload = cloudinary.uploader.upload_stream(
-          {
-            resource_type: 'image',
-            folder: 'uploads',
-          },
+          
           (error, result) => {
             if (error) return reject(error);
             resolve(result);
           },
         );
-
         stream.pipe(upload);
       });
+      
     });
-
-    // Đợi tất cả file upload xong
     return Promise.all(uploadPromises);
   }
 }

@@ -12,6 +12,8 @@ import { PageOptionsDto } from 'src/common/pagination/paginationOptions.dto';
 import { PageDto } from 'src/common/pagination/responsePagination.dto';
 import { PageMetaDto } from './dto';
 import { FilterDto } from '../filter/dto/filter.dto';
+import { v2 as cloudinary } from 'cloudinary';
+import { ProductPhotoService } from '../productPhoto/productPhoto.service';
 //import { Color } from '../variant/dto/create-variant.dto';
 @Injectable()
 export class ProductService {
@@ -24,43 +26,47 @@ export class ProductService {
     private productPhotoRepository: Repository<ProductPhoto>,
     @InjectRepository(Variant)
     private variantRepository: Repository<Variant>,
+
+    private readonly productPhotoService: ProductPhotoService,
   ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
-    const category = await this.categoryRepository.findOne({
-      where: { id: createProductDto.categoryId },
-    });
+  async create(
+    createProductDto: CreateProductDto,
+    files: Express.Multer.File[],
+  ): Promise<Product> {
+    const { name, price, info, quantity, categoryId, variants } =
+      createProductDto;
 
+    // Kiểm tra danh mục
+    const category = await this.categoryRepository.findOne({
+      where: { id: categoryId },
+    });
     if (!category) {
       throw new NotFoundException('Category not found');
     }
 
-    // Tạo sản phẩm
     const product = this.productRepository.create({
-      name: createProductDto.name,
-      price: createProductDto.price,
-      url: createProductDto.urls[0],
-      info: createProductDto.info,
-      quantity: createProductDto.quantity,
+      name,
+      price,
+      info,
+      quantity,
       category,
     });
-
-    // Lưu sản phẩm vào product
     const savedProduct = await this.productRepository.save(product);
 
-    // Tạo các đối tượng ảnh sản phẩm dựa trên danh sách URL trong createProductDto.urls và liên kết chúng với savedProduct
-    const productPhotos = createProductDto.urls.map(url =>
-      this.productPhotoRepository.create({ url, product: savedProduct })
-    );
+    if (files && files.length > 0) {
+      await this.productPhotoService.uploadAndSaveMultiplePhotos(
+        files,
+        savedProduct.id,
+      );
+    }
 
-    await this.productPhotoRepository.save(productPhotos);
-
-    //Tạo các biến thể Variant
-    const variants = createProductDto.variants.map(variantDto =>
-      this.variantRepository.create({ ...variantDto, product: savedProduct })
-    );
-    
-    await this.variantRepository.save(variants);
+    if (variants && variants.length > 0) {
+      const variantEntities = variants.map((variant) =>
+        this.variantRepository.create({ ...variant, product: savedProduct }),
+      );
+      await this.variantRepository.save(variantEntities);
+    }
 
     return this.findOne(savedProduct.id);
   }
@@ -167,25 +173,30 @@ export class ProductService {
         isDelete: false,
       },
       order: {
-        price: 'ASC', 
+        price: 'ASC',
       },
     });
   }
 
-  async getPriceBySizeAndColor(productId: string, size: string, color: string): Promise<number> {
+  async getPriceBySizeAndColor(
+    productId: string,
+    size: string,
+    color: string,
+  ): Promise<number> {
     const variant = await this.variantRepository.findOne({
       where: { product: { id: productId }, size, color },
     });
 
     if (!variant) {
-      throw new NotFoundException('Variant not found for the given size and color');
+      throw new NotFoundException(
+        'Variant not found for the given size and color',
+      );
     }
 
     return variant.price;
   }
 
   async filterProducts(filterDto: FilterDto): Promise<PageDto<Product>> {
-    console.log('Filter DTO:', filterDto);
     const {
       search,
       minPrice,
@@ -207,14 +218,22 @@ export class ProductService {
       .where('product.isDelete = :isDelete', { isDelete: false });
 
     if (search) {
-      queryBuilder.andWhere(new Brackets(qb => {
-        qb.where('LOWER(product.name::text) LIKE :search', { search: `%${search.toLowerCase()}%` })
-          .orWhere('LOWER(product.info::text) LIKE :search', { search: `%${search.toLowerCase()}%` });
-      }));
+      queryBuilder.andWhere(
+        new Brackets((qb) => {
+          qb.where('LOWER(product.name::text) LIKE :search', {
+            search: `%${search.toLowerCase()}%`,
+          }).orWhere('LOWER(product.info::text) LIKE :search', {
+            search: `%${search.toLowerCase()}%`,
+          });
+        }),
+      );
     }
 
     if (minPrice !== undefined && maxPrice !== undefined) {
-      queryBuilder.andWhere('product.price BETWEEN :minPrice AND :maxPrice', { minPrice, maxPrice });
+      queryBuilder.andWhere('product.price BETWEEN :minPrice AND :maxPrice', {
+        minPrice,
+        maxPrice,
+      });
     }
 
     if (categoryId) {
@@ -235,11 +254,11 @@ export class ProductService {
       {
         page: pageNum,
         take: pageSize,
-        skip: (pageNum - 1) * pageSize
+        skip: (pageNum - 1) * pageSize,
       },
-      total
+      total,
     );
 
     return new PageDto<Product>(result, pageMetaDto, 'Success');
-}
+  }
 }
