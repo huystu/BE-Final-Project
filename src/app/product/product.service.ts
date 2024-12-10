@@ -12,7 +12,6 @@ import { PageOptionsDto } from 'src/common/pagination/paginationOptions.dto';
 import { PageDto } from 'src/common/pagination/responsePagination.dto';
 import { PageMetaDto } from './dto';
 import { FilterDto } from '../filter/dto/filter.dto';
-import { v2 as cloudinary } from 'cloudinary';
 import { ProductPhotoService } from '../productPhoto/productPhoto.service';
 //import { Color } from '../variant/dto/create-variant.dto';
 @Injectable()
@@ -205,8 +204,8 @@ export class ProductService {
       limit = 10,
       take,
       orderBy = 'DESC',
-      categoryId,
-      //brandId
+      categoryId= [],
+      // brandId= [],
     } = filterDto;
 
     const validOrder = orderBy === 'ASC' ? 'ASC' : 'DESC';
@@ -236,9 +235,13 @@ export class ProductService {
       });
     }
 
-    if (categoryId) {
-      queryBuilder.andWhere('category.id = :categoryId', { categoryId });
+    if (categoryId.length > 0) {
+      queryBuilder.andWhere('category.id IN (:...categoryId)', { categoryId });
     }
+
+    // if (brandId.length > 0) {
+    //   queryBuilder.andWhere('brand.id IN (:...brandId)', { brandId });
+    // }
 
     queryBuilder.orderBy('product.createdAt', validOrder);
 

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany,
 } from 'typeorm';
 import { Product } from './product.entity';
