@@ -105,14 +105,25 @@ export class CartService {
         discount: discount || 0,
       });
       await this.cartRepository.save(currentCart);
+      currentCart.transactions = [];
     }
 
     const product = await this.productRepository.findOne({
-      where: { id: productId, quantity: MoreThan(0) },
+      where: { id: productId },
     });
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found`);
+    }
+
+    if (product.quantity === 0) {
+      throw new BadRequestException(`Product ${product.name} is out of stock`);
+    }
+
+    if (product.quantity < quantity) {
+      throw new BadRequestException(
+        `Only ${product.quantity} items of ${product.name} are available in stock`,
+      );
     }
 
     const existingTransaction = currentCart.transactions.find(
@@ -120,12 +131,16 @@ export class CartService {
     );
 
     if (existingTransaction) {
-    
+      if (existingTransaction.quantity + quantity > product.quantity) {
+        throw new BadRequestException(
+          `You cannot add ${quantity} more items of ${product.name}. Only ${product.quantity - existingTransaction.quantity} items left in stock.`,
+        );
+      }
+
       existingTransaction.quantity += quantity;
       existingTransaction.price = existingTransaction.quantity * product.price;
       await this.cartTransactionRepository.save(existingTransaction);
     } else {
-
       const newTransaction = this.cartTransactionRepository.create({
         cart: currentCart,
         product: product,
@@ -136,9 +151,6 @@ export class CartService {
     }
 
     product.quantity -= quantity;
-    if (product.quantity < 0) {
-      throw new BadRequestException(`Product ${product.name} is out of stock`);
-    }
     await this.productRepository.save(product);
 
     await this.caculateTotalPrice(currentCart.cartId);
@@ -230,6 +242,24 @@ export class CartService {
     currentCart.price = Math.max(0, totalPrice - currentCart.discount);
 
     return await this.cartRepository.save(currentCart);
+  }
+
+  async getTotalQuantityByUserId(userId: string): Promise<number> {
+    const currentCart = await this.cartRepository.findOne({
+      where: { user: { id: userId }, isDelete: false },
+      relations: ['transactions'], 
+    });
+
+    if (!currentCart) {
+      throw new NotFoundException(`Cart for user with ID ${userId} not found`);
+    }
+
+    const totalQuantity = currentCart.transactions.reduce(
+      (total, transaction) => total + transaction.quantity,
+      0,
+    );
+
+    return totalQuantity;
   }
 
   async deleteProduct(id: string): Promise<CartTransaction> {

@@ -1,13 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Order } from 'src/entities/order.entity';
-import { Repository } from 'typeorm';
+import { Order, OrderStatus } from 'src/entities/order.entity';
+import { In, Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/createOrder.dto';
 import { User } from 'src/entities/user.entity';
 import { Address } from 'src/entities/address.entity';
 import { Coupon } from 'src/entities/coupon.entity';
 import { CartTransaction } from 'src/entities/cartTransaction.entity';
 import { UpdateOrderDto } from './dto/updateOrder.dto';
+import { validate as isUUID } from 'uuid';
 
 @Injectable()
 export class OrderService {
@@ -35,7 +40,7 @@ export class OrderService {
       couponId,
       orderStatus,
       methodShipping,
-      listProductId,
+      listCartTransactionId,
     } = createOrderDto;
 
     // Kiểm tra user tồn tại
@@ -56,34 +61,42 @@ export class OrderService {
     let coupon: Coupon | undefined = undefined;
     if (couponId) {
       coupon = await this.couponRepository.findOne({ where: { couponId } });
+      if (coupon.quantity <= 0) {
+        throw new NotFoundException('Sold Out');
+      }
       if (!coupon) {
         throw new NotFoundException('Coupon not found');
       }
     }
+    if (orderStatus == OrderStatus.DONE) {
+      coupon.quantity = coupon.quantity - 1;
+    }
+    let totalPrice: number = 0;
 
-    // Tạo mới order
-    const order = await this.orderRepository.create({
+    const order = this.orderRepository.create({
       user,
       address,
       coupon: coupon || null,
       methodShipping,
       status: orderStatus,
+      price: 0,
     });
 
-    listProductId.forEach(async (element) => {
-      const product = await this.cartTransactionRepository.findOneBy({
+    for (const element of listCartTransactionId) {
+      const cartTransaction = await this.cartTransactionRepository.findOneBy({
         transactionId: element,
       });
-      const orderFounded = await this.orderRepository.findOneBy({
-        orderId: order.orderId,
-      });
-
-      await this.cartTransactionRepository.update(product.transactionId, {
-        order: orderFounded,
-      });
-    });
+      if (cartTransaction) {
+        totalPrice += cartTransaction.price;
+      }
+    }
+     if (orderStatus == OrderStatus.DONE) {
+      totalPrice = totalPrice - coupon.discountPercent;
+     }
+    order.price = totalPrice;
     // Lưu order vào cơ sở dữ liệu
-    return this.orderRepository.save(order);
+    await this.couponRepository.save(coupon);
+    return await this.orderRepository.save(order);
   }
 
   async updateOrder(updateOrderDto: UpdateOrderDto): Promise<Order> {
@@ -130,6 +143,22 @@ export class OrderService {
     return this.orderRepository.save(order);
   }
 
+  async getHistoryOrdersByUserId(userId: string): Promise<Order[]> {
+    return this.orderRepository.find({
+      where: [
+        {
+          user: { id: userId },
+          status: OrderStatus.DONE,
+        },
+        {
+          user: { id: userId },
+          status: OrderStatus.FINISH_ORDER,
+        },
+      ],
+      relations: ['transactions.product'],
+      order: { createdAt: 'DESC' },
+    });
+  }
 
   async getOrderById(orderId: string): Promise<Order> {
     const order = await this.orderRepository.findOne({
@@ -146,6 +175,13 @@ export class OrderService {
     return this.orderRepository.find({
       where: { user: { id: userId } },
       relations: ['address', 'coupon'],
+    });
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    return await this.orderRepository.find({
+      relations: ['user', 'address', 'coupon', 'transactions.product'],
+      order: { createdAt: 'DESC' },
     });
   }
 }

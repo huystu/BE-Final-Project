@@ -29,16 +29,6 @@ export class CartController {
     return await this.cartService.getHistoryCart(userId);
   }
 
-  @Get('/:cartId')
-  async getCart(@Param('cartId') cartId: string): Promise<Cart> {
-    return await this.cartService.getCartByCartId(cartId);
-  }
-  @ApiQuery({
-    name: 'cartId',
-    required: false,
-    description:
-      'Optional cart ID. If not provided, a new cart will be created.',
-  })
   @Post('add')
   async addProductToCart(
     @Body() addProductDto: AddProductToCartDto,
@@ -56,6 +46,16 @@ export class CartController {
     });
   }
 
+  @Get('/:cartId')
+  async getCart(@Param('cartId') cartId: string): Promise<Cart> {
+    return await this.cartService.getCartByCartId(cartId);
+  }
+  @ApiQuery({
+    name: 'cartId',
+    required: false,
+    description:
+      'Optional cart ID. If not provided, a new cart will be created.',
+  })
   @Get('items/:userId')
   async getCartItemsByUserId(@Param('userId') userId: string) {
     return this.cartService.getCartItemsByUserId(userId);
@@ -71,6 +71,15 @@ export class CartController {
   @HttpCode(HttpStatus.OK)
   async plusQuantity(@Param('id') id: string): Promise<boolean> {
     return await this.cartService.plusQuantityOrderDetails(id);
+  }
+
+  @Get('totalQuantity/:userId')
+  async getTotalQuantity(
+    @Param('userId') userId: string,
+  ): Promise<{ totalQuantity: number }> {
+    const totalQuantity =
+      await this.cartService.getTotalQuantityByUserId(userId);
+    return { totalQuantity };
   }
 
   @Delete('/product/:productId')

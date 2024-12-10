@@ -1,11 +1,28 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
+  Body,
+  BadRequestException,
+  Delete,
+  Param,
+} from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProductPhotoService } from './productPhoto.service';
 
 @Controller('productPhoto')
-@ApiTags('productPhoto')
-@UseGuards(JwtAuthGuard)
 export class ProductPhotoController {
   constructor(private readonly productPhotoService: ProductPhotoService) {}
+
+  // Upload và lưu ảnh (nhận productId từ body)
+  @Delete(':id')
+  async deletePhotoById(@Param('id') id: string) {
+    const photos = await this.productPhotoService.removePhotoById(id);
+
+    return {
+      message: 'Photo deleted and saved successfully',
+      photos,
+    };
+  }
 }
