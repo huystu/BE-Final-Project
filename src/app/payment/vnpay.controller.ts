@@ -44,7 +44,7 @@ export class PaymentController {
           </head>
           <body>
             <h1>Thanh toán thành công!</h1>
-            <button onclick="window.location.href='http://localhost:5173/paymentsuccess'">
+            <button onclick="window.location.href='${process.env.COME_BACK_URLs}'">
               Đi tới trang thanh toán thành công
             </button>
           </body>
