@@ -8,7 +8,7 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Get('create')
-  @Redirect()
+  // @Redirect()
   createPayment(
     @Query('amount') amount: number,
     @Query('orderInfo') orderInfo: string,
@@ -34,11 +34,21 @@ export class PaymentController {
     const signData = qs.stringify(sortedParams, { encode: true });
     const hmac = crypto.createHmac('sha512', process.env.VNPAY_HASH_SECRET);
     const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
-    console.log(query['vnp_ResponseCode']);
 
     if (vnpSecureHash === signed) {
       if (query['vnp_ResponseCode'] === '00') {
-        return 'Thanh toán thành công!';
+        return `<!DOCTYPE html>
+          <html>
+          <head>
+            <title>Thanh toán thành công</title>
+          </head>
+          <body>
+            <h1>Thanh toán thành công!</h1>
+            <button onclick="window.location.href='http://localhost:5173/paymentsuccess'">
+              Đi tới trang thanh toán thành công
+            </button>
+          </body>
+          </html>`;
       } else {
         return `Thanh toán thất bại với mã lỗi: ${query['vnp_ResponseCode']}`;
       }

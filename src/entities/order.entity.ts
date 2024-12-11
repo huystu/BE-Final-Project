@@ -20,7 +20,7 @@ export enum MethodShippingEnum {
 
 export enum OrderStatus {
   FINISH_ORDER = 'finish_order',
-  PAYMENT_FAIL = 'payment_fail',
+  NOT_PAYMENT = 'not_payment',
   PAYMENT_SUCCESS = 'payment_success',
   DONE = 'done',
 }
@@ -66,7 +66,7 @@ export class Order {
   @Column({
     type: 'enum',
     enum: OrderStatus,
-    default: OrderStatus.FINISH_ORDER,
+    // default: OrderStatus.FINISH_ORDER,
   })
   status: OrderStatus;
 

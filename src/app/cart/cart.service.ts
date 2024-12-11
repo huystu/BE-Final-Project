@@ -44,10 +44,14 @@ export class CartService {
   }
 
   async getCartItemsByUserId(userId: string): Promise<CartTransaction[]> {
-    const cart = await this.cartRepository.findOne({
-      where: { user: { id: userId }, isDelete: false },
-      relations: ['transactions', 'transactions.product'],
-    });
+    const cart = await this.cartRepository
+      .createQueryBuilder('cart')
+      .leftJoinAndSelect('cart.transactions', 'transactions')
+      .leftJoinAndSelect('transactions.product', 'product')
+      .where('cart.userId = :userId', { userId })
+      .andWhere('cart.isDelete = :isDelete', { isDelete: false })
+      .andWhere('transactions.order IS NULL')
+      .getOne();
 
     if (!cart) {
       throw new NotFoundException(`Cart for user with ID ${userId} not found`);
@@ -247,7 +251,7 @@ export class CartService {
   async getTotalQuantityByUserId(userId: string): Promise<number> {
     const currentCart = await this.cartRepository.findOne({
       where: { user: { id: userId }, isDelete: false },
-      relations: ['transactions'], 
+      relations: ['transactions'],
     });
 
     if (!currentCart) {

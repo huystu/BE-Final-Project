@@ -38,10 +38,11 @@ export class OrderService {
       userId,
       addressId,
       couponId,
-      orderStatus,
+      status,
       methodShipping,
       listCartTransactionId,
     } = createOrderDto;
+
 
     // Kiểm tra sự tồn tại của user
     const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -70,7 +71,7 @@ export class OrderService {
         throw new BadRequestException('Coupon is sold out');
       }
 
-      discountPercent = coupon.discountPercent || 0; 
+      discountPercent = coupon.discountPercent || 0;
     }
 
     // Tạo đơn hàng
@@ -79,7 +80,7 @@ export class OrderService {
       address,
       coupon: coupon || null,
       methodShipping,
-      status: orderStatus,
+      status,
       price: 0, // Sẽ tính toán lại sau
     });
 
@@ -104,7 +105,7 @@ export class OrderService {
     }
 
     // Trừ giá trị cố định của coupon nếu có và trạng thái đơn hàng là DONE
-    if (coupon && orderStatus === OrderStatus.DONE) {
+    if (coupon && status === OrderStatus.DONE) {
       totalPrice -= discountPercent; // Sử dụng giá trị giảm cố định
       totalPrice = Math.max(totalPrice, 0); // Đảm bảo giá trị không âm
       coupon.quantity -= 1; // Giảm số lượng coupon còn lại
