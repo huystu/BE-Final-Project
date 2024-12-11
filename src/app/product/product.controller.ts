@@ -23,7 +23,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from 'src/entities/category.entity';
 import { ProductPhoto } from 'src/entities/productPhoto.entity';
-import { Variant } from 'src/entities/variant.entity';
 import { FilterDto } from '../filter/dto/filter.dto';
 import { Roles } from 'src/common/decorator/role.decorator';
 import { Role } from 'src/common/enum/role.enum';
@@ -42,8 +41,6 @@ export class ProductController {
     private categoryRepository: Repository<Category>,
     @InjectRepository(ProductPhoto)
     private productPhotoRepository: Repository<ProductPhoto>,
-    @InjectRepository(Variant)
-    private variantRepository: Repository<Variant>,
   ) {}
 
   @Post('filter')
@@ -55,34 +52,28 @@ export class ProductController {
   @Roles(Role.Admin, Role.Seller)
   @UseInterceptors(FilesInterceptor('files'))
   async createProduct(
-    @UploadedFiles() files: Express.Multer.File[],
+    // @UploadedFiles() files: Express.Multer.File[],
     @Body() createProductDto: CreateProductDto,
   ) {
-    if (typeof createProductDto.urls === 'string') {
-      createProductDto.urls = JSON.parse(createProductDto.urls);
-    }
-    if (typeof createProductDto.info === 'string') {
-      createProductDto.info = JSON.parse(createProductDto.info);
-    }
-    createProductDto.variants.forEach((element, index) => {
-      if (typeof element === 'string') {
-        element = JSON.parse(element);
-        createProductDto.variants[index] = element;
-      }
-    });
-    const productDto = plainToClass(CreateProductDto, createProductDto);
-    return this.productService.create(productDto, files);
+    // if (typeof createProductDto.urls === 'string') {
+    //   createProductDto.urls = JSON.parse(createProductDto.urls);
+    // }
+    // if (typeof createProductDto.info === 'string') {
+    //   createProductDto.info = JSON.parse(createProductDto.info);
+    // }
+    // const productDto = plainToClass(CreateProductDto, createProductDto);
+    return this.productService.create(createProductDto);
   }
 
   @Patch(':id')
   @Roles(Role.Admin, Role.Seller)
-  @UseInterceptors(FilesInterceptor('files'))
+  // @UseInterceptors(FilesInterceptor('files'))
   async update(
     @Param('id') id: string,
-    @UploadedFiles() files: Express.Multer.File[],
+    // @UploadedFiles() files: Express.Multer.File[],
     @Body() updateProductDto: UpdateProductDto,
   ) {
-    return this.productService.update(id, updateProductDto, files);
+    return this.productService.update(id, updateProductDto);
   }
 
   @Delete(':id')
@@ -109,12 +100,12 @@ export class ProductController {
     return this.productService.findByCategory(categoryId, pageOptionsDto);
   }
 
-  @Get(':productId/price')
-  async getPrice(
-    @Param('productId') productId: string,
-    @Query('size') size: string,
-    @Query('color') color: string,
-  ) {
-    return this.productService.getPriceBySizeAndColor(productId, size, color);
-  }
+  // @Get(':productId/price')
+  // async getPrice(
+  //   @Param('productId') productId: string,
+  //   @Query('size') size: string,
+  //   @Query('color') color: string,
+  // ) {
+  //   return this.productService.getPriceBySizeAndColor(productId, size, color);
+  // }
 }

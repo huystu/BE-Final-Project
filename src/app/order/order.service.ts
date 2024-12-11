@@ -43,13 +43,13 @@ export class OrderService {
       listCartTransactionId,
     } = createOrderDto;
 
-    // Kiểm tra user tồn tại
+    // Kiểm tra sự tồn tại của user
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    // Kiểm tra address tồn tại
+    // Kiểm tra sự tồn tại của address
     const address = await this.addressRepository.findOne({
       where: { addressId },
     });
@@ -57,46 +57,72 @@ export class OrderService {
       throw new NotFoundException('Address not found');
     }
 
-    // Kiểm tra coupon (nếu có)
-    let coupon: Coupon | undefined = undefined;
+    // Kiểm tra và xử lý coupon (nếu có)
+    let coupon: Coupon | undefined;
+    let discountPercent = 0; // Giá trị giảm giá cố định
     if (couponId) {
       coupon = await this.couponRepository.findOne({ where: { couponId } });
-      if (coupon.quantity <= 0) {
-        throw new NotFoundException('Sold Out');
-      }
       if (!coupon) {
         throw new NotFoundException('Coupon not found');
       }
-    }
-    if (orderStatus == OrderStatus.DONE) {
-      coupon.quantity = coupon.quantity - 1;
-    }
-    let totalPrice: number = 0;
 
+      if (coupon.quantity <= 0) {
+        throw new BadRequestException('Coupon is sold out');
+      }
+
+      discountPercent = coupon.discountPercent || 0; 
+    }
+
+    // Tạo đơn hàng
     const order = this.orderRepository.create({
       user,
       address,
       coupon: coupon || null,
       methodShipping,
       status: orderStatus,
-      price: 0,
+      price: 0, // Sẽ tính toán lại sau
     });
 
-    for (const element of listCartTransactionId) {
-      const cartTransaction = await this.cartTransactionRepository.findOneBy({
-        transactionId: element,
+    // Duyệt qua danh sách CartTransaction và tính tổng giá
+    const cartTransactions: CartTransaction[] = [];
+    let totalPrice = 0;
+
+    for (const transactionId of listCartTransactionId) {
+      const cartTransaction = await this.cartTransactionRepository.findOne({
+        where: { transactionId },
       });
-      if (cartTransaction) {
-        totalPrice += cartTransaction.price;
+
+      if (!cartTransaction) {
+        throw new NotFoundException(
+          `CartTransaction with ID ${transactionId} not found`,
+        );
       }
+
+      totalPrice += cartTransaction.price;
+      cartTransaction.order = order; // Gắn order vào CartTransaction
+      cartTransactions.push(cartTransaction);
     }
-     if (orderStatus == OrderStatus.DONE) {
-      totalPrice = totalPrice - coupon.discountPercent;
-     }
+
+    // Trừ giá trị cố định của coupon nếu có và trạng thái đơn hàng là DONE
+    if (coupon && orderStatus === OrderStatus.DONE) {
+      totalPrice -= discountPercent; // Sử dụng giá trị giảm cố định
+      totalPrice = Math.max(totalPrice, 0); // Đảm bảo giá trị không âm
+      coupon.quantity -= 1; // Giảm số lượng coupon còn lại
+    }
+
+    // Gán giá trị đã tính toán cho đơn hàng
     order.price = totalPrice;
-    // Lưu order vào cơ sở dữ liệu
-    await this.couponRepository.save(coupon);
-    return await this.orderRepository.save(order);
+
+    // Lưu đơn hàng và các CartTransaction
+    await this.orderRepository.save(order);
+    await this.cartTransactionRepository.save(cartTransactions);
+
+    // Lưu coupon nếu có
+    if (coupon) {
+      await this.couponRepository.save(coupon);
+    }
+
+    return order;
   }
 
   async updateOrder(updateOrderDto: UpdateOrderDto): Promise<Order> {

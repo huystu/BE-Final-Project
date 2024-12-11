@@ -21,10 +21,10 @@ export class Coupon {
   expirationDate?: Date; // Ngày hết hạn (tùy chọn)
 
   @Column({ type: 'boolean', default: true })
-  isActive: boolean; // Trạng thái hoạt động
+  isActive: boolean;
 
   @Column({ type: 'int', default: 0 })
-  quantity: number; // Trạng thái hoạt động
+  quantity: number; 
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

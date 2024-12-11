@@ -7,12 +7,12 @@ import { ProductService } from './product.service';
 import { CategoryModule } from '../category/category.module';  
 import { Category } from 'src/entities/category.entity';  
 import { ProductPhoto } from 'src/entities/productPhoto.entity';
-import { Variant } from 'src/entities/variant.entity';
 import { ProductPhotoModule } from '../productPhoto/productPhoto.module';
+import { Brand } from 'src/entities/brand.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Product, Category, ProductPhoto, Variant]),
+    TypeOrmModule.forFeature([Product, Category, ProductPhoto, Brand]),
     CategoryModule,
     ProductPhotoModule,
   ],

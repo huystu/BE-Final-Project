@@ -8,14 +8,17 @@ export class AddressController {
   constructor(private readonly addressService: AddressService) {}
 
   @Post()
-  async createAddress(
-    @Body() createAddressDto: CreateAddressDto,
-  ): Promise<Address> {
+  async createAddress(@Body() createAddressDto: CreateAddressDto) {
     return this.addressService.createAddress(createAddressDto);
   }
   @Get(':userId')
   async getAddresses(@Param('userId') userId: string): Promise<Address[]> {
-   return this.addressService.getAddressesByUserId(userId);
+    return this.addressService.getAddressesByUserId(userId);
+  }
+
+  @Get('details/:id')
+  async getAddressById(@Param('id') addressId: string): Promise<Address> {
+    return this.addressService.getAddressById(addressId);
   }
 
   @Delete(':id')

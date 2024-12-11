@@ -7,14 +7,27 @@ import {
   IsObject,
   IsUUID,
   IsNotEmpty,
-  ValidateNested,
   Min,
   ArrayMinSize,
   IsArray,
-  IsOptional,
+  IsEnum,
 } from 'class-validator';
-import { CreateVariantDto } from 'src/app/variant/dto/create-variant.dto';
 
+export enum Color {
+  Red = 'Red',
+  Blue = 'Blue',
+  Green = 'Green',
+  Yellow = 'Yellow',
+  Black = 'Black',
+  White = 'White',
+  Gray = 'Gray',
+  Brown = 'Brown',
+  Pink = 'Pink',
+  Purple = 'Purple',
+  Orange = 'Orange',
+  Gold = 'Gold',
+  Silver = 'Silver',
+}
 // DTO cho thông tin chi tiết sản phẩm
 export class ProductInfoDto {
   @ApiProperty()
@@ -22,9 +35,7 @@ export class ProductInfoDto {
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty({
-    description: 'Chính sách đổi trả hoặc bảo hành',
-  })
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   policy: string;
@@ -40,12 +51,25 @@ export class CreateProductDto {
   name: string;
 
   @ApiProperty({
-    description: 'Giá của sản phẩm',
+    description: 'Chi tiết sản phẩm',
   })
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
   @IsNumber()
   @Type(() => Number)
   @Min(0)
   price: number;
+
+  @ApiProperty({})
+  @IsArray()
+  size: string[];
+
+  @ApiProperty({ enum: Color, isArray: true })
+  @IsEnum(Color, { each: true })
+  @IsArray()
+  color: Color[];
 
   @ApiProperty({
     type: 'string',
@@ -56,14 +80,12 @@ export class CreateProductDto {
   @IsString({ each: true })
   urls: string[];
 
-  @ApiProperty({
-    description: 'Thông tin chi tiết sản phẩm',
-    type: ProductInfoDto,
-  })
-  @IsString()
-  // @ValidateNested()
-  @Type(() => ProductInfoDto)
-  info: ProductInfoDto;
+  // @ApiProperty({
+  //   description: 'Thông tin chi tiết sản phẩm',
+  //   type: ProductInfoDto,
+  // })
+  // @Type(() => ProductInfoDto)
+  // info: ProductInfoDto;
 
   @ApiProperty({
     description: 'Số lượng sản phẩm trong kho',
@@ -76,17 +98,12 @@ export class CreateProductDto {
   @ApiProperty({
     description: 'ID của danh mục sản phẩm',
   })
-  @IsUUID()
+  // @IsUUID()
   @IsNotEmpty()
   categoryId: string;
 
-  @ApiProperty({
-    description: 'Danh sách các biến thể sản phẩm (ví dụ: màu sắc, kích thước)',
-    type: [CreateVariantDto],
-  })
-  @IsArray()
-  @ArrayMinSize(1, { message: 'Phải có ít nhất một biến thể sản phẩm.' })
-  // @ValidateNested({ each: true })
-  @Type(() => CreateVariantDto)
-  variants: CreateVariantDto[];
+  @ApiProperty()
+  //@IsUUID()
+  @IsNotEmpty()
+  brandId: string;
 }

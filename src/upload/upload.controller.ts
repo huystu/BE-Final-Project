@@ -31,7 +31,7 @@ export class UploadController {
   }
 
   @Post('mutipleImage')
-  @UseInterceptors(FilesInterceptor('files', 10)) // Cho phép upload tối đa 10 file
+  @UseInterceptors(FilesInterceptor('files', 5)) // Cho phép upload tối đa 10 file
   async uploadMultipleImages(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() metadata: UploadMultipleImagesDto,
