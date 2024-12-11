@@ -5,7 +5,6 @@ import { Repository, Between, ILike, Like, Brackets } from 'typeorm';
 import { Product } from 'src/entities/product.entity';
 import { ProductPhoto } from 'src/entities/productPhoto.entity';
 import { Category } from 'src/entities/category.entity';
-import { Variant } from 'src/entities/variant.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PageOptionsDto } from 'src/common/pagination/paginationOptions.dto';
@@ -13,7 +12,7 @@ import { PageDto } from 'src/common/pagination/responsePagination.dto';
 import { PageMetaDto } from './dto';
 import { FilterDto } from '../filter/dto/filter.dto';
 import { ProductPhotoService } from '../productPhoto/productPhoto.service';
-//import { Color } from '../variant/dto/create-variant.dto';
+import { Brand } from 'src/entities/brand.entity';
 @Injectable()
 export class ProductService {
   constructor(
@@ -23,49 +22,67 @@ export class ProductService {
     private categoryRepository: Repository<Category>,
     @InjectRepository(ProductPhoto)
     private productPhotoRepository: Repository<ProductPhoto>,
-    @InjectRepository(Variant)
-    private variantRepository: Repository<Variant>,
+
+    @InjectRepository(Brand)
+    private brandRepository: Repository<Brand>,
 
     private readonly productPhotoService: ProductPhotoService,
   ) {}
 
   async create(
     createProductDto: CreateProductDto,
-    files: Express.Multer.File[],
+    // files: Express.Multer.File[],
   ): Promise<Product> {
-    const { name, price, info, quantity, categoryId, variants } =
-      createProductDto;
+    const {
+      name,
+      price,
+      description,
+      quantity,
+      categoryId,
+      color,
+      size,
+      urls,
+      brandId,
+    } = createProductDto;
 
     // Kiểm tra danh mục
     const category = await this.categoryRepository.findOne({
-      where: { id: categoryId },
+      where: {
+        id: categoryId,
+      },
     });
     if (!category) {
       throw new NotFoundException('Category not found');
     }
 
+    const brand = await this.brandRepository.findOne({
+      where: {
+        id: brandId,
+      },
+    });
+    if (!brand) {
+      throw new NotFoundException('Brand not found');
+    }
+
     const product = this.productRepository.create({
       name,
       price,
-      info,
+      description,
+      urls,
       quantity,
       category,
+      brand,
+      color,
+      size,
     });
     const savedProduct = await this.productRepository.save(product);
 
-    if (files && files.length > 0) {
-      await this.productPhotoService.uploadAndSaveMultiplePhotos(
-        files,
-        savedProduct.id,
-      );
-    }
-
-    if (variants && variants.length > 0) {
-      const variantEntities = variants.map((variant) =>
-        this.variantRepository.create({ ...variant, product: savedProduct }),
-      );
-      await this.variantRepository.save(variantEntities);
-    }
+    // if (files && files.length > 0) {
+    //   await this.productPhotoService.uploadAndSaveMultiplePhotos(
+    //     files,
+    //     savedProduct.id,
+    //   );
+    // }
 
     return this.findOne(savedProduct.id);
   }
@@ -73,7 +90,7 @@ export class ProductService {
   async findOne(id: string) {
     const product = await this.productRepository.findOne({
       where: { id, isDelete: false },
-      relations: ['category', 'photos', 'variants'],
+      relations: ['category', 'photos'],
     });
     if (!product) {
       throw new NotFoundException('Product not found');
@@ -84,15 +101,15 @@ export class ProductService {
   async update(
     id: string,
     updateProductDto: UpdateProductDto,
-    files: Express.Multer.File[],
+    // files: Express.Multer.File[],
   ): Promise<Product> {
     const product = await this.productRepository.findOne({
       where: { id },
     });
 
-    if (files && files.length > 0) {
-      await this.productPhotoService.uploadAndSaveMultiplePhotos(files, id);
-    }
+    // if (files && files.length > 0) {
+    //   await this.productPhotoService.uploadAndSaveMultiplePhotos(files, id);
+    // }
 
     if (updateProductDto.categoryId) {
       const category = await this.categoryRepository.findOne({
@@ -188,23 +205,23 @@ export class ProductService {
     });
   }
 
-  async getPriceBySizeAndColor(
-    productId: string,
-    size: string,
-    color: string,
-  ): Promise<number> {
-    const variant = await this.variantRepository.findOne({
-      where: { product: { id: productId }, size, color },
-    });
+  // async getPriceBySizeAndColor(
+  //   productId: string,
+  //   size: string,
+  //   color: string,
+  // ): Promise<number> {
+  //   const variant = await this.variantRepository.findOne({
+  //     where: { product: { id: productId }, size, color },
+  //   });
 
-    if (!variant) {
-      throw new NotFoundException(
-        'Variant not found for the given size and color',
-      );
-    }
+  //   if (!variant) {
+  //     throw new NotFoundException(
+  //       'Variant not found for the given size and color',
+  //     );
+  //   }
 
-    return variant.price;
-  }
+  //   return variant.price;
+  // }
 
   async filterProducts(filterDto: FilterDto): Promise<PageDto<Product>> {
     const {

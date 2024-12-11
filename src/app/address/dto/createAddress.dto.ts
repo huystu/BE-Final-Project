@@ -2,6 +2,10 @@ import { IsNotEmpty, IsString, IsEmail, IsUUID, Length } from 'class-validator';
 
 export class CreateAddressDto {
   @IsNotEmpty()
+  @IsUUID()
+  userId: string;
+
+  @IsNotEmpty()
   @Length(10, 20)
   phone: string; // Số điện thoại
 
@@ -12,10 +16,6 @@ export class CreateAddressDto {
   @IsNotEmpty()
   @Length(2, 255)
   recipientName: string; // Tên người nhận
-
-  @IsNotEmpty()
-  @Length(2, 100)
-  city: string; // Thành phố
 
   @IsNotEmpty()
   @Length(2, 100)
@@ -33,7 +33,5 @@ export class CreateAddressDto {
   @Length(2, 255)
   detailedAddress: string; // Địa chỉ chi tiết
 
-  @IsNotEmpty()
-  @IsUUID()
-  userId: string; // ID người dùng liên kết
+  // ID người dùng liên kết
 }

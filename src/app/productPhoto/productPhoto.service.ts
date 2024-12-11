@@ -66,14 +66,11 @@ export class ProductPhotoService {
       throw new NotFoundException('Category not found');
     }
 
-    console.log(currentProduct, productId);
     // Lưu thông tin ảnh vào DB
     const photo = await this.productPhotoRepository.create({
       product: { id: productId } as Product,
       url: uploadResult.secure_url,
     });
-
-    console.log(photo);
 
     return await this.productPhotoRepository.save(photo);
   }

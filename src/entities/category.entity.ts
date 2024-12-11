@@ -17,9 +17,6 @@ export class Category {
   @Column({ type: 'varchar', unique: true })
   name: string;
 
-  @Column({ type: 'varchar', unique: true, nullable: true })
-  categoryId: string;
-
   @OneToMany(() => Product, (product) => product.category)
   products: Product[];
 
