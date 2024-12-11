@@ -11,7 +11,7 @@ import { ProductModule } from './app/product/product.module';
 import { CategoryModule } from './app/category/category.module';
 import { MailModule } from './provider/mail/mail.module';
 import { CartModule } from './app/cart/cart.module';
-import { VnpayModule } from './app/payment/vnpay.module';
+import { PaymentModule } from './app/payment/vnpay.module';
 import { UploadModule } from './upload/upload.module';
 import { BrandModule } from './app/brand/brand.module';
 import { AddressModule } from './app/address/address.module';
@@ -32,7 +32,7 @@ import { ReviewModule } from './app/review/review.module';
     CategoryModule,
     MailModule,
     CartModule,
-    VnpayModule,
+    PaymentModule,
     UploadModule,
     BrandModule,
     AddressModule,

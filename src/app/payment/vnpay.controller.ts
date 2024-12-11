@@ -1,60 +1,49 @@
-import { Controller, Get, Post, Body, Query } from '@nestjs/common';
+import { Controller, Get, Query, Redirect } from '@nestjs/common';
 import * as crypto from 'crypto';
-import { VnpayService } from './vnpay.service';
-import { CreatePaymentDto } from '../../auth/dto/vnpay.dto';
+import * as qs from 'qs';
+import { PaymentService } from './vnpay.service';
 
 @Controller('payment')
-export class VnpayController {
-  constructor(private readonly vnpayService: VnpayService) { }
+export class PaymentController {
+  constructor(private readonly paymentService: PaymentService) {}
 
-  @Post('create')
-  async createPayment(@Body() createPaymentDto: CreatePaymentDto) {
-    const { orderId, amount, orderDescription } = createPaymentDto;
-
-    const paymentUrl = this.vnpayService.generatePaymentUrl(
-      orderId,
+  @Get('create')
+  @Redirect()
+  createPayment(
+    @Query('amount') amount: number,
+    @Query('orderInfo') orderInfo: string,
+    @Query('orderId') orderId: string,
+    @Query('bankCode') bankCode?: string,
+  ) {
+    const paymentUrl = this.paymentService.createPaymentUrl(
+      orderInfo,
       amount,
-      orderDescription,
+      orderId,
+      bankCode,
     );
-
-    return { paymentUrl };
+    return { url: paymentUrl };
   }
 
   @Get('vnpay-return')
-  async handleVnpayReturn(
-    @Query() query: Record<string, string | number | boolean>,
-  ) {
-    const vnp_Params = { ...query };
-    const secureHash = vnp_Params['vnp_SecureHash'] as string;
-    delete vnp_Params['vnp_SecureHash'];
+  handleVnPayReturn(@Query() query: any) {
+    const vnpSecureHash = query['vnp_SecureHash'];
+    delete query['vnp_SecureHash'];
+    delete query['vnp_SecureHashType'];
 
-    const sortedParams = Object.keys(vnp_Params)
-      .sort()
-      .reduce((acc, key) => {
-        acc[key] = vnp_Params[key];
-        return acc;
-      }, {} as Record<string, string | number | boolean>);
+    const sortedParams = this.paymentService.sortObject(query);
+    const signData = qs.stringify(sortedParams, { encode: true });
+    const hmac = crypto.createHmac('sha512', process.env.VNPAY_HASH_SECRET);
+    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+    console.log(query['vnp_ResponseCode']);
 
-    const querystring = Object.entries(sortedParams)
-      .map(([key, value]) => `${key}=${encodeURIComponent(value as string)}`)
-      .join('&');
-
-    const hash = crypto
-      .createHmac('sha512', this.vnpayService.getVnpHashSecret())
-      .update(querystring)
-      .digest('hex');
-
-    if (hash !== secureHash) {
-      throw new Error('Invalid signature from VNPay');
-    }
-
-    const orderId = vnp_Params['vnp_TxnRef'] as string;
-    const paymentStatus = vnp_Params['vnp_ResponseCode'] as string;
-
-    if (paymentStatus === '00') {
-      return { message: 'Payment successful', orderId };
+    if (vnpSecureHash === signed) {
+      if (query['vnp_ResponseCode'] === '00') {
+        return 'Thanh toán thành công!';
+      } else {
+        return `Thanh toán thất bại với mã lỗi: ${query['vnp_ResponseCode']}`;
+      }
     } else {
-      return { message: 'Payment failed', orderId };
+      return 'Chữ ký không hợp lệ!';
     }
   }
 }

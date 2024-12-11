@@ -1,49 +1,64 @@
-import * as crypto from 'crypto';
 import { Injectable } from '@nestjs/common';
+import * as crypto from 'crypto';
+import * as qs from 'qs';
 
 @Injectable()
-export class VnpayService {
-  private readonly vnp_TmnCode = '62Y98TCN';
-  private readonly vnp_HashSecret = 'E2O0A9U6HETKZU8GPR10O7G5MWJ9M917';
-  private readonly vnp_Url = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
-  private readonly vnp_ReturnUrl = 'http://localhost:3000/payment/vnpay-return';
+export class PaymentService {
+  createPaymentUrl(
+    orderInfo: string,
+    amount: number,
+    orderId: string,
+    bankCode?: string,
+  ): string {
+    const tmnCode = process.env.VNPAY_TMN_CODE;
+    const hashSecret = process.env.VNPAY_HASH_SECRET;
+    const vnpUrl = process.env.VNPAY_URL;
+    const returnUrl = process.env.VNPAY_RETURN_URL;
+    const vnp_Params: any = {};
 
-  getVnpHashSecret(): string {
-    return this.vnp_HashSecret;
+    vnp_Params['vnp_Version'] = '2.1.0';
+    vnp_Params['vnp_Command'] = 'pay';
+    vnp_Params['vnp_TmnCode'] = tmnCode;
+    vnp_Params['vnp_Locale'] = 'vn';
+    vnp_Params['vnp_CurrCode'] = 'VND';
+    vnp_Params['vnp_TxnRef'] = orderId;
+    vnp_Params['vnp_OrderInfo'] = orderInfo;
+    vnp_Params['vnp_OrderType'] = 'other';
+    vnp_Params['vnp_Amount'] = amount * 100;
+    vnp_Params['vnp_ReturnUrl'] = returnUrl;
+    vnp_Params['vnp_IpAddr'] = '127.0.0.1';
+
+    if (bankCode) {
+      vnp_Params['vnp_BankCode'] = bankCode;
+    }
+
+    vnp_Params['vnp_CreateDate'] = this.getFormattedDate();
+    const sortedParams = this.sortObject(vnp_Params);
+    const signData = qs.stringify(sortedParams, { encode: true });
+    const hmac = crypto.createHmac('sha512', hashSecret);
+    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+    sortedParams['vnp_SecureHash'] = signed;
+
+    return `${vnpUrl}?${qs.stringify(sortedParams, { encode: true })}`;
   }
-  generatePaymentUrl(orderId: string, amount: number, orderInfo: string): string {
+
+  getFormattedDate(): string {
     const date = new Date();
-    const createDate = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}${date.getSeconds().toString().padStart(2, '0')}`;
+    const year = date.getFullYear();
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+    const hour = ('0' + date.getHours()).slice(-2);
+    const minute = ('0' + date.getMinutes()).slice(-2);
+    const second = ('0' + date.getSeconds()).slice(-2);
+    return `${year}${month}${day}${hour}${minute}${second}`;
+  }
 
-    const vnp_Params: any = {
-      vnp_Version: '2.1.0',
-      vnp_Command: 'pay',
-      vnp_TmnCode: this.vnp_TmnCode,
-      vnp_Locale: 'vn',
-      vnp_CurrCode: 'VND',
-      vnp_TxnRef: orderId,
-      vnp_OrderInfo: orderInfo,
-      vnp_OrderType: 'billpayment',
-      vnp_Amount: amount,
-      vnp_ReturnUrl: this.vnp_ReturnUrl,
-      vnp_IpAddr: '127.0.0.1',
-      vnp_CreateDate: createDate,
-    };
-
-    const sortedParams = Object.keys(vnp_Params).sort().reduce((acc, key) => {
-      acc[key] = vnp_Params[key];
-      return acc;
-    }, {} as Record<string, string | number>);
-
-    const querystring = Object.entries(sortedParams)
-      .map(([key, value]) => `${key}=${encodeURIComponent(value as string)}`)
-      .join('&');
-
-    const signData = this.vnp_HashSecret + querystring;
-    const secureHash = crypto.createHmac('sha512', this.vnp_HashSecret)
-                              .update(signData)
-                              .digest('hex');
-
-    return `${this.vnp_Url}?${querystring}&vnp_SecureHash=${secureHash}`;
+  sortObject(obj: any): any {
+    const sorted: any = {};
+    const keys = Object.keys(obj).sort();
+    keys.forEach((key) => {
+      sorted[key] = obj[key];
+    });
+    return sorted;
   }
 }
