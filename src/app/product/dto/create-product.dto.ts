@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { IsOptional } from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -76,8 +77,8 @@ export class CreateProductDto {
     isArray: true,
   })
   @IsArray()
-  @ArrayMinSize(1, { message: 'Ít nhất phải có một URL ảnh.' })
-  @IsString({ each: true })
+  // @ArrayMinSize(1, { message: 'Ít nhất phải có một URL ảnh.' })
+  // @IsString({ each: true })
   urls: string[];
 
   // @ApiProperty({
@@ -104,6 +105,6 @@ export class CreateProductDto {
 
   @ApiProperty()
   //@IsUUID()
-  @IsNotEmpty()
+  @IsOptional()
   brandId: string;
 }

@@ -39,7 +39,9 @@ export class PaymentService {
     const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
     sortedParams['vnp_SecureHash'] = signed;
 
-    return `${vnpUrl}?${qs.stringify(sortedParams, { encode: true })}`;
+    const url = `${vnpUrl}?${qs.stringify(sortedParams, { encode: true })}`;
+
+    return url;
   }
 
   getFormattedDate(): string {

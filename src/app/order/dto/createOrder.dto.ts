@@ -28,6 +28,6 @@ export class CreateOrderDto {
   @IsNotEmpty()
   methodShipping: MethodShippingEnum;
 
-  @Optional()
-  orderStatus: OrderStatus;
+  @IsOptional()
+  status: OrderStatus;
 }
